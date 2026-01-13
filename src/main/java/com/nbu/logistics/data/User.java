@@ -13,32 +13,25 @@ import java.time.LocalDateTime;
 
 
 @Entity
-@Table(name = "users") // Matches your SQL table name
-public class Users {
+@Table(name = "users")
+public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-
+    
+    @Column(nullable = false, unique = true)
     private String username;
+    @Column(nullable = false, unique = true)
     private String email;
-    private String role;
-    private boolean enabled;
+    @Column(nullable = false)
+    private String password;
+            
+    private String role = "user";
+    private boolean enabled = true;
     
     @Column(name = "created_at")
     private LocalDateTime createdAt;
-
-    public Users() {
-    }
-
-    public Users(int id, String username, String email, String role, boolean enabled, LocalDateTime createdAt) {
-        this.id = id;
-        this.username = username;
-        this.email = email;
-        this.role = role;
-        this.enabled = enabled;
-        this.createdAt = createdAt;
-    }
 
     public int getId() {
         return id;
@@ -56,6 +49,14 @@ public class Users {
         this.username = username;
     }
 
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+    
     public String getEmail() {
         return email;
     }
@@ -86,6 +87,11 @@ public class Users {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+    
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
     }
 
     
