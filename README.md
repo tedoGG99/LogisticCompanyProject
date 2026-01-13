@@ -8,3 +8,4 @@
     - Linux : ./mvnw spring-boot:run 
     - Windows: mvnw spring-boot:run
     
+3. Boyan test
