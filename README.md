@@ -2,6 +2,9 @@
 
 ## <center> Commands
 
-1. run:
+1. build
+    mvn clean package
+2. run:
     - Linux : ./mvnw spring-boot:run 
     - Windows: mvnw spring-boot:run
+    
