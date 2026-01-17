@@ -13,4 +13,4 @@ public interface TariffRepository extends JpaRepository<Tariff, Integer> {
             LocalDate from,
             LocalDate to
     );
-}
+}//
