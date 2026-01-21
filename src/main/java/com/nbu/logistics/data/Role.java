@@ -30,7 +30,7 @@ public class Role {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int id;
 
     // Stores values like: "ROLE_CLIENT", "ROLE_OFFICE_EMPLOYEE", "ROLE_COURIER"
     @Column(nullable = false, unique = true)

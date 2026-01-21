@@ -31,7 +31,7 @@ import java.util.List;
 public class Office {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int id;
 
     // e.g., "Sofia Central", "Plovdiv North"
     @Column(nullable = false)

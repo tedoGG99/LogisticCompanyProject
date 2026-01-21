@@ -15,8 +15,6 @@ package com.nbu.logistics.data;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -36,7 +34,7 @@ import org.hibernate.annotations.CreationTimestamp;
 public class Shipment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private int id;
 
     // Use a String for tracking numbers (e.g., UUIDs) to avoid running out of integers
     @Column(nullable = false, unique = true)
@@ -90,7 +88,139 @@ public class Shipment {
     private String deliveryAddress;
 
     @Column(nullable = false)
-    private ShipmentStatus statusId; // Enum: REGISTERED, SENT, RECEIVED, DELIVERED
+    private ShipmentStatus status; // Enum: REGISTERED, SENT, RECEIVED, DELIVERED
+
+    public Shipment() {
+    }
+    
+    public Shipment(int id, String trackingNumber, Double weight, BigDecimal price, LocalDateTime dateRegistered, LocalDateTime dateDelivered, User sender, User receiver, String receiverName, String receiverPhone, int deliveryTypeId, Office office, String deliveryAddress, ShipmentStatus statusId) {
+        this.id = id;
+        this.trackingNumber = trackingNumber;
+        this.weight = weight;
+        this.price = price;
+        this.dateRegistered = dateRegistered;
+        this.dateDelivered = dateDelivered;
+        this.sender = sender;
+        this.receiver = receiver;
+        this.receiverName = receiverName;
+        this.receiverPhone = receiverPhone;
+        this.deliveryTypeId = deliveryTypeId;
+        this.office = office;
+        this.deliveryAddress = deliveryAddress;
+        this.status = statusId;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getTrackingNumber() {
+        return trackingNumber;
+    }
+
+    public void setTrackingNumber(String trackingNumber) {
+        this.trackingNumber = trackingNumber;
+    }
+
+    public Double getWeight() {
+        return weight;
+    }
+
+    public void setWeight(Double weight) {
+        this.weight = weight;
+    }
+
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
+
+    public LocalDateTime getDateRegistered() {
+        return dateRegistered;
+    }
+
+    public void setDateRegistered(LocalDateTime dateRegistered) {
+        this.dateRegistered = dateRegistered;
+    }
+
+    public LocalDateTime getDateDelivered() {
+        return dateDelivered;
+    }
+
+    public void setDateDelivered(LocalDateTime dateDelivered) {
+        this.dateDelivered = dateDelivered;
+    }
+
+    public User getSender() {
+        return sender;
+    }
+
+    public void setSender(User sender) {
+        this.sender = sender;
+    }
+
+    public User getReceiver() {
+        return receiver;
+    }
+
+    public void setReceiver(User receiver) {
+        this.receiver = receiver;
+    }
+
+    public String getReceiverName() {
+        return receiverName;
+    }
+
+    public void setReceiverName(String receiverName) {
+        this.receiverName = receiverName;
+    }
+
+    public String getReceiverPhone() {
+        return receiverPhone;
+    }
+
+    public void setReceiverPhone(String receiverPhone) {
+        this.receiverPhone = receiverPhone;
+    }
+
+    public int getDeliveryTypeId() {
+        return deliveryTypeId;
+    }
+
+    public void setDeliveryTypeId(int deliveryTypeId) {
+        this.deliveryTypeId = deliveryTypeId;
+    }
+
+    public Office getOffice() {
+        return office;
+    }
+
+    public void setOffice(Office office) {
+        this.office = office;
+    }
+
+    public String getDeliveryAddress() {
+        return deliveryAddress;
+    }
+
+    public void setDeliveryAddress(String deliveryAddress) {
+        this.deliveryAddress = deliveryAddress;
+    }
+
+    public ShipmentStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ShipmentStatus statusId) {
+        this.status = statusId;
+    }
     
     
     
