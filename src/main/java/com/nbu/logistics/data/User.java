@@ -6,6 +6,7 @@ package com.nbu.logistics.data;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 /**
  *
  * @author tedi
@@ -27,8 +28,37 @@ public class User {
     @Column(nullable = false)
     private String password;
             
-    private String role = "user";
+    @Column(nullable = false)
+    private String firstName;
+
+    @Column(nullable = false)
+    private String lastName;
+    
+    // Soft Delete field (as discussed)
+    @Column(nullable = false)
     private boolean enabled = true;
+
+    // --- CHANGED: ROLE RELATIONSHIP ---
+    
+    // Many Users can share the same Role (e.g., many Clients)
+    @ManyToOne(fetch = FetchType.EAGER) // Eager fetch is useful for Roles to avoid login errors
+    @JoinColumn(name = "role_id", nullable = false)
+    private Role role;
+
+    // --- OFFICE RELATIONSHIP ---
+    
+    // Mandatory for OFFICE_EMPLOYEE, null for others
+    @ManyToOne
+    @JoinColumn(name = "office_id")
+    private Office office;
+
+    // --- SHIPMENT RELATIONSHIPS ---
+
+    @OneToMany(mappedBy = "sender")
+    private List<Shipment> sentShipments;
+
+    @OneToMany(mappedBy = "receiver")
+    private List<Shipment> receivedShipments;
     
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -65,13 +95,6 @@ public class User {
         this.email = email;
     }
 
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
 
     public boolean isEnabled() {
         return enabled;
