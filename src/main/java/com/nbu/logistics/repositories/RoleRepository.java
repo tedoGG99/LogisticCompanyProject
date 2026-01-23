@@ -4,13 +4,15 @@
  */
 package com.nbu.logistics.repositories;
 
-import com.nbu.logistics.data.Office;
+import com.nbu.logistics.data.Role;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
  *
  * @author tedi
  */
-public interface OfficeRepository extends JpaRepository<Office, Integer>{
+public interface RoleRepository extends JpaRepository<Role, Integer>{
+    Optional<Role> findByRole(String role);
     
 }

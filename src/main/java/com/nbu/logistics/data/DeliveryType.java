@@ -25,13 +25,13 @@ import jakarta.persistence.Table;
  * @author Teodor Georgiev
  */
 @Entity
-@Table(name = "delivery_type")
+@Table(name = "delivery_types")
 public class DeliveryType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
      @Column(nullable = false)
-    private String type;
+    private String type_name;
 
     public DeliveryType() {
     }
@@ -44,13 +44,15 @@ public class DeliveryType {
         this.id = id;
     }
 
-    public String getType() {
-        return type;
+    public String getType_name() {
+        return type_name;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setType_name(String type_name) {
+        this.type_name = type_name;
     }
+
+   
      
      
      

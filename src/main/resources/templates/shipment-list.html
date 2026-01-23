@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <title>Dashboard - Logistics</title>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+</head>
+<body>
+
+<div class="navbar">
+    <div class="brand">📦 Logistics Co.</div>
+    <div>
+        <span sec:authentication="name">User</span>
+        
+        <a th:href="@{/shipments}">My Shipments</a>
+        
+        <a sec:authorize="hasAnyRole('OFFICE_EMPLOYEE', 'COURIER', 'ADMIN')" 
+           th:href="@{/reports}">Reports</a>
+           
+        <a th:href="@{/logout}">Logout</a>
+    </div>
+</div>
+
+<div class="main-container">
+    
+    <div class="table-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="margin:0; color:#333;">Shipment List</h2>
+            
+            <a sec:authorize="hasAnyRole('OFFICE_EMPLOYEE', 'ADMIN')" 
+               th:href="@{/shipments/create}" 
+               class="login-btn" style="width: auto; text-decoration: none;">
+               + New Shipment
+            </a>
+        </div>
+
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Tracking #</th>
+                    <th>Sender</th>
+                    <th>Receiver</th>
+                    <th>Destination</th>
+                    <th>Weight</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                    <th sec:authorize="hasAnyRole('OFFICE_EMPLOYEE', 'COURIER')">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="shipment : ${shipments}">
+                    <td th:text="${shipment.trackingNumber}">#12345</td>
+                    
+                    <td th:text="${shipment.sender.getFullName()}">John Doe</td>
+                    
+                    <td>
+                        <span th:if="${shipment.receiver != null}" th:text="${shipment.receiver.getFullName()}"></span>
+                        <span th:if="${shipment.receiver == null}" th:text="${shipment.receiverName + ' (Guest)'}"></span>
+                    </td>
+                    
+                    <td>
+                        <span th:if="${shipment.office != null}" 
+                              th:text="'🏢 ' + ${shipment.office.name}"></span>
+                        <span th:if="${shipment.deliveryAddress != null}" 
+                              th:text="'🏠 ' + ${shipment.deliveryAddress}"></span>
+                    </td>
+                    
+                    <td th:text="${shipment.weight} + ' kg'">2.5 kg</td>
+                    <td th:text="'$' + ${shipment.price}">$15.00</td>
+                    
+                    <td>
+                        <span th:class="'badge badge-' + ${shipment.status.statusName}" 
+                              th:text="${shipment.status.statusName}">SENT</span>
+                    </td>
+                    
+                    <td sec:authorize="hasAnyRole('OFFICE_EMPLOYEE', 'COURIER')">
+                        <form th:action="@{/shipments/{id}/status(id=${shipment.id})}" method="post" style="display:inline;">
+                            <button th:if="${shipment.status.statusName == 'SENT'}"
+                                    type="submit" name="status" value="RECEIVED"
+                                    class="btn-sm btn-primary">Receive</button>
+                                    
+                            <button th:if="${shipment.status.statusName == 'RECEIVED'}"
+                                    type="submit" name="status" value="DELIVERED"
+                                    class="btn-sm btn-primary">Deliver</button>
+                        </form>
+                    </td>
+                </tr>
+                
+                <tr th:if="${#lists.isEmpty(shipments)}">
+                    <td colspan="8" style="text-align: center; padding: 2rem; color: #666;">
+                        No shipments found.
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+</body>
+</html>

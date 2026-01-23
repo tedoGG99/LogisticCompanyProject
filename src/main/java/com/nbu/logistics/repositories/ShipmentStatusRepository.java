@@ -5,6 +5,7 @@
 package com.nbu.logistics.repositories;
 
 import com.nbu.logistics.data.ShipmentStatus;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
@@ -12,7 +13,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * @author tedi
  */
 
-public interface ShipmentStatusRepository extends JpaRepository<ShipmentStatus, Long> { 
+public interface ShipmentStatusRepository extends JpaRepository<ShipmentStatus, Integer> { 
           
-    ShipmentStatus findByStatusName(String name);
+    Optional<ShipmentStatus> findByStatusName(String statusName);
 }

@@ -25,7 +25,7 @@ import jakarta.persistence.Table;
  * @author Teodor Georgiev
  */
 @Entity
-@Table(name = "shipment_status")
+@Table(name = "shipment_statuses")
 public class ShipmentStatus {
 //    REGISTERED, // Registered by employee
 //    SENT,       // On the way
@@ -36,6 +36,34 @@ public class ShipmentStatus {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
     @Column(nullable = false)
-    private String status;
+    private String status_name;
+
+    public ShipmentStatus() {
+    }
+
+    public ShipmentStatus(int id, String status) {
+        this.id = id;
+        this.status_name = status;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getStatus_name() {
+        return status_name;
+    }
+
+    public void setStatus_name(String status_name) {
+        this.status_name = status_name;
+    }
+
+   
+    
+    
 
 }

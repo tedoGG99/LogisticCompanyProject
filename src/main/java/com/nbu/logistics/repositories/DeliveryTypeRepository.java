@@ -5,15 +5,16 @@
 package com.nbu.logistics.repositories;
 
 import com.nbu.logistics.data.DeliveryType;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**
  *
  * @author tedi
  */
-public interface DeliveryTypeRepository extends JpaRepository<DeliveryType, Long> {
+public interface DeliveryTypeRepository extends JpaRepository<DeliveryType, Integer> {
     
-    DeliveryType findByTypeName(String type);
+    Optional<DeliveryType> findByTypeName(String typeName);
     
     
 }

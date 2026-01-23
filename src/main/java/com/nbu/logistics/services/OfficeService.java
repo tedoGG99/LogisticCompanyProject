@@ -23,7 +23,7 @@ public class OfficeService {
         return officeRepository.findAll();
     }
     
-    public Office getOfficeById(Long id) {
+    public Office getOfficeById(int id) {
         return officeRepository.findById(id).orElseThrow(() -> new RuntimeException("Office not found"));
     }
 }

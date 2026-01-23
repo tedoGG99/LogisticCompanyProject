@@ -76,8 +76,9 @@ public class Shipment {
     // A shipment is EITHER to an Office OR to an Address.
 
     
-    @Column(nullable = false)
-    private int deliveryTypeId; // Enum: TO_OFFICE, TO_ADDRESS
+    @ManyToOne
+    @JoinColumn(name = "delivery_type_id", nullable = false)
+    private DeliveryType deliveryTypeId; // Enum: TO_OFFICE, TO_ADDRESS
 
     // If TO_OFFICE, this must be set
     @ManyToOne
@@ -87,13 +88,14 @@ public class Shipment {
     // If TO_ADDRESS, this must be set
     private String deliveryAddress;
 
-    @Column(nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "status_id", nullable = false)
     private ShipmentStatus status; // Enum: REGISTERED, SENT, RECEIVED, DELIVERED
 
     public Shipment() {
     }
     
-    public Shipment(int id, String trackingNumber, Double weight, BigDecimal price, LocalDateTime dateRegistered, LocalDateTime dateDelivered, User sender, User receiver, String receiverName, String receiverPhone, int deliveryTypeId, Office office, String deliveryAddress, ShipmentStatus statusId) {
+    public Shipment(int id, String trackingNumber, Double weight, BigDecimal price, LocalDateTime dateRegistered, LocalDateTime dateDelivered, User sender, User receiver, String receiverName, String receiverPhone, DeliveryType deliveryTypeId, Office office, String deliveryAddress, ShipmentStatus statusId) {
         this.id = id;
         this.trackingNumber = trackingNumber;
         this.weight = weight;
@@ -190,11 +192,11 @@ public class Shipment {
         this.receiverPhone = receiverPhone;
     }
 
-    public int getDeliveryTypeId() {
+    public DeliveryType getDeliveryTypeId() {
         return deliveryTypeId;
     }
 
-    public void setDeliveryTypeId(int deliveryTypeId) {
+    public void setDeliveryTypeId(DeliveryType deliveryTypeId) {
         this.deliveryTypeId = deliveryTypeId;
     }
 

@@ -10,7 +10,7 @@ package com.nbu.logistics.dto;
  */
 public class ShipmentDto {
     
-    private Long id;
+    private int id;
     private int senderId;           // The client sending the package
     private String receiverUsername; // If receiver is a registered user
     private String receiverName;     // If guest
@@ -18,7 +18,7 @@ public class ShipmentDto {
     
     private Double weight;
     private String deliveryType;     // "TO_OFFICE" or "TO_ADDRESS"
-    private Long targetOfficeId;     // If TO_OFFICE
+    private int targetOfficeId;     // If TO_OFFICE
     private String targetAddress;    // If TO_ADDRESS
     
     private String status;           // Status update
@@ -30,11 +30,11 @@ public class ShipmentDto {
     }
 
     // Getters and Setters
-    public Long getId() {
+    public int getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(int id) {
         this.id = id;
     }
 
@@ -86,11 +86,11 @@ public class ShipmentDto {
         this.deliveryType = deliveryType;
     }
 
-    public Long getTargetOfficeId() {
+    public int getTargetOfficeId() {
         return targetOfficeId;
     }
 
-    public void setTargetOfficeId(Long targetOfficeId) {
+    public void setTargetOfficeId(int targetOfficeId) {
         this.targetOfficeId = targetOfficeId;
     }
 

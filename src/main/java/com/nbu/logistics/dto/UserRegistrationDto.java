@@ -9,13 +9,14 @@ package com.nbu.logistics.dto;
  * @author tedi
  */
 public class UserRegistrationDto {
+    
     private String username;
     private String email;
     private String password;
     private String firstName;
     private String lastName;
     private String roleName; // e.g., "CLIENT", "OFFICE_EMPLOYEE"
-    private Long officeId;   // Only if role is OFFICE_EMPLOYEE
+    private int officeId;   // Only if role is OFFICE_EMPLOYEE
     
     public UserRegistrationDto() {
     }
@@ -69,11 +70,11 @@ public class UserRegistrationDto {
         this.roleName = roleName;
     }
 
-    public Long getOfficeId() {
+    public int getOfficeId() {
         return officeId;
     }
 
-    public void setOfficeId(Long officeId) {
+    public void setOfficeId(int officeId) {
         this.officeId = officeId;
     }
     
