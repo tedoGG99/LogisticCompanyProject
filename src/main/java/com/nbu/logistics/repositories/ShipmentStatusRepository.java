@@ -21,4 +21,5 @@ public interface ShipmentStatusRepository extends JpaRepository<ShipmentStatus, 
     Optional<ShipmentStatus> findByStatusName(String statusName);
     
     Optional<ShipmentStatus> findFirstByIsInitialTrue();
+    Optional<ShipmentStatus> findFirstByIsFinalTrue();
 }

@@ -1,100 +1,121 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
+<html lang="en" xmlns:th="http://www.thymeleaf.org" 
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <title>Dashboard - Logistics</title>
-    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <meta charset="UTF-8">
+    <title>Dashboard | Logistics Co.</title>
+    
+    <link href="/css/dashboard.css" rel="stylesheet">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
 </head>
 <body>
 
-<div class="navbar">
-    <div class="brand">📦 Logistics Co.</div>
-    <div>
-        <span sec:authentication="name">User</span>
+    <nav class="navbar">
+        <div class="brand">
+            <i class="bi bi-box-seam-fill"></i> Logistics Co.
+        </div>
         
-        <a th:href="@{/shipments}">My Shipments</a>
-        
-        <a sec:authorize="hasAnyRole('OFFICE_EMPLOYEE', 'COURIER', 'ADMIN')" 
-           th:href="@{/reports}">Reports</a>
-           
-        <a th:href="@{/logout}">Logout</a>
-    </div>
-</div>
-
-<div class="main-container">
-    
-    <div class="table-card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-            <h2 style="margin:0; color:#333;">Shipment List</h2>
+        <div>
+            <span style="margin-right: 1rem;">
+                Welcome, <span sec:authentication="name">User</span>
+            </span>
             
-            <a sec:authorize="hasAnyRole('OFFICE_EMPLOYEE', 'ADMIN')" 
-               th:href="@{/shipments/create}" 
-               class="login-btn" style="width: auto; text-decoration: none;">
-               + New Shipment
-            </a>
+            <a href="/shipments">My Shipments</a>
+            
+            <a href="/reports" th:if="${isStaff}">Reports</a>
+
+            <form th:action="@{/logout}" method="post" style="display:inline;">
+                <button type="submit" style="background:none; border:none; color:white; cursor:pointer; font-weight:500; font-size:1rem; margin-left:1.5rem;">
+                    Logout
+                </button>
+            </form>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+            <h2>Shipment List</h2>
+
+            <div>
+                 <a href="/shipments/create" class="btn-sm btn-primary">
+                    <i class="bi bi-plus-lg"></i> New Shipment
+                 </a>
+            </div>
         </div>
 
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>Tracking #</th>
-                    <th>Sender</th>
-                    <th>Receiver</th>
-                    <th>Destination</th>
-                    <th>Weight</th>
-                    <th>Price</th>
-                    <th>Status</th>
-                    <th sec:authorize="hasAnyRole('OFFICE_EMPLOYEE', 'COURIER')">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr th:each="shipment : ${shipments}">
-                    <td th:text="${shipment.trackingNumber}">#12345</td>
+        <div class="table-card">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Tracking #</th>
+                        <th>Sender</th>
+                        <th>Receiver</th>
+                        <th>Destination</th>
+                        <th>Weight</th>
+                        <th>Price</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="shipment : ${shipments}">
+                        
+                        <td style="font-weight:bold;" th:text="${shipment.trackingNumber}"></td>
+                        
+                        <td th:text="${shipment.sender.username}"></td>
+                        
+                        <td>
+                            <div th:if="${shipment.receiver != null}" th:text="${shipment.receiver.username}"></div>
+                            <div th:if="${shipment.receiver == null}">
+                                <span th:text="${shipment.receiverName}"></span><br>
+                                <small style="color:#666;" th:text="${shipment.receiverPhone}"></small>
+                            </div>
+                        </td>
+
+                        <td>
+                            <div th:if="${shipment.office != null}" th:text="|Office: ${shipment.office.city}|"></div>
+                            <div th:if="${shipment.office == null}" th:text="${shipment.deliveryAddress}"></div>
+                        </td>
+
+                        <td th:text="|${shipment.weight} kg|"></td>
+                        
+                        <td style="color: #28a745; font-weight:bold;" th:text="|$${shipment.price}|"></td>
+                        
+                        <td>
+                            <span class="badge" 
+                                  th:classappend="|badge-${shipment.status.statusName}|"
+                                  th:text="${shipment.status.statusName}">
+                            </span>
+                        </td>
+                        
+                        <td>
+                            <div th:if="${isStaff}">
+                                <form th:if="${shipment.status.id != deliveredStatusId}"
+                                      th:action="@{/shipments/{id}/status(id=${shipment.id})}" 
+                                      method="post">
+                                    <input type="hidden" name="status" th:value="${deliveredStatusId}" />
+                                    <button type="submit" class="btn-sm btn-primary">Deliver</button>
+                                </form>
+                                <span th:if="${shipment.status.id == deliveredStatusId}" style="color:green;">Done</span>
+                            </div>
+                            
+                            <div th:if="${!isStaff}">
+                                <a href="#" style="color:#007bff; text-decoration:underline;">Details</a>
+                            </div>
+                        </td>
+                    </tr>
                     
-                    <td th:text="${shipment.sender.getFullName()}">John Doe</td>
-                    
-                    <td>
-                        <span th:if="${shipment.receiver != null}" th:text="${shipment.receiver.getFullName()}"></span>
-                        <span th:if="${shipment.receiver == null}" th:text="${shipment.receiverName + ' (Guest)'}"></span>
-                    </td>
-                    
-                    <td>
-                        <span th:if="${shipment.office != null}" 
-                              th:text="'🏢 ' + ${shipment.office.name}"></span>
-                        <span th:if="${shipment.deliveryAddress != null}" 
-                              th:text="'🏠 ' + ${shipment.deliveryAddress}"></span>
-                    </td>
-                    
-                    <td th:text="${shipment.weight} + ' kg'">2.5 kg</td>
-                    <td th:text="'$' + ${shipment.price}">$15.00</td>
-                    
-                    <td>
-                        <span th:class="'badge badge-' + ${shipment.status.statusName}" 
-                              th:text="${shipment.status.statusName}">SENT</span>
-                    </td>
-                    
-                    <td sec:authorize="hasAnyRole('OFFICE_EMPLOYEE', 'COURIER')">
-                        <form th:action="@{/shipments/{id}/status(id=${shipment.id})}" method="post" style="display:inline;">
-                            <button th:if="${shipment.status.statusName == 'SENT'}"
-                                    type="submit" name="status" value="RECEIVED"
-                                    class="btn-sm btn-primary">Receive</button>
-                                    
-                            <button th:if="${shipment.status.statusName == 'RECEIVED'}"
-                                    type="submit" name="status" value="DELIVERED"
-                                    class="btn-sm btn-primary">Deliver</button>
-                        </form>
-                    </td>
-                </tr>
-                
-                <tr th:if="${#lists.isEmpty(shipments)}">
-                    <td colspan="8" style="text-align: center; padding: 2rem; color: #666;">
-                        No shipments found.
-                    </td>
-                </tr>
-            </tbody>
-        </table>
+                    <tr th:if="${#lists.isEmpty(shipments)}">
+                        <td colspan="8" style="text-align:center; padding: 2rem; color: #666;">
+                            No shipments found.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
-</div>
 
 </body>
 </html>

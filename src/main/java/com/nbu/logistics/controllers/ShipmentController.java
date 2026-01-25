@@ -1,8 +1,11 @@
 
 package com.nbu.logistics.controllers;
 
+import com.nbu.logistics.data.ShipmentStatus;
 import com.nbu.logistics.data.User;
 import com.nbu.logistics.dto.ShipmentDto;
+import com.nbu.logistics.repositories.DeliveryTypeRepository;
+import com.nbu.logistics.repositories.ShipmentStatusRepository;
 import com.nbu.logistics.services.OfficeService;
 import com.nbu.logistics.services.ShipmentService;
 import com.nbu.logistics.services.UserService;
@@ -25,31 +28,62 @@ public class ShipmentController {
     @Autowired 
     private ShipmentService shipmentService;
     @Autowired 
+    private ShipmentStatusRepository shipmentStatusRepository;
+    @Autowired 
     private OfficeService officeService;
     @Autowired 
     private UserService userService;
+    @Autowired
+    private DeliveryTypeRepository deliveryTypeRepository;
     
     // 1. DASHBOARD: List shipments based on who is logged in
     @GetMapping
     public String listShipments(@AuthenticationPrincipal UserDetails userDetails, Model model) {
         User currentUser = userService.findByUsername(userDetails.getUsername());
-        
-        // Service logic decides: Employee gets ALL, Client gets THEIRS
+
+        // 1. DATA: The Shipments
         model.addAttribute("shipments", shipmentService.findShipmentsForUser(currentUser));
-        
-        return "shipment-list"; // HTML Template name
+
+        // 2. DYNAMIC PERMISSIONS (Instead of sec:authorize with hardcoded strings)
+        // We check the 'is_staff' flag from the Role table in DB
+        boolean isStaff = Boolean.TRUE.equals(currentUser.getRole().getIsStaff());
+        model.addAttribute("isStaff", isStaff);
+
+        // 3. DYNAMIC STATUS IDs (For the buttons)
+        // We fetch the actual ID of the 'DELIVERED' status from the DB to avoid hardcoding "4" or "5"
+        // Assuming you added 'is_final' column, or we look up by a convention
+        ShipmentStatus deliveredStatus = shipmentStatusRepository.findFirstByIsFinalTrue()
+            .orElse(null); // or handle error
+
+        // If you don't have is_final, you might need to look up by name safely or add the column
+        // For now, let's assume you added 'is_final' to the DB as discussed before.
+        if (deliveredStatus != null) {
+            model.addAttribute("deliveredStatusId", deliveredStatus.getId());
+        }
+
+        // Pass the current user's role ID or name for other logic if needed
+        model.addAttribute("currentUserRole", currentUser.getRole().getRole());
+
+        return "shipment-list";
     }
+    
     
     // 2. CREATE FORM: Only for Employees (Secured by SecurityConfig)
     @GetMapping("/create")
     public String showCreateForm(Model model) {
         model.addAttribute("shipmentDto", new ShipmentDto());
-        
-        // Populate dropdowns
+
+        // 1. DROPDOWNS DATA
         model.addAttribute("offices", officeService.getAllOffices());
-        model.addAttribute("clients", userService.findAllClients()); // For "Sender" dropdown
-        
-        return "shipment-create";
+
+        // 2. We need Delivery Types to know which one requires an office
+        model.addAttribute("deliveryTypes", deliveryTypeRepository.findAll()); 
+
+        // 3. Optional: Only show clients list if the logged-in user is an Employee
+        // (You can handle this check in the HTML too via Thymeleaf)
+        model.addAttribute("clients", userService.findAllClients()); 
+
+        return "shipment-create"; // This looks for shipment-create.html in templates
     }
     
     // 3. PROCESS CREATE

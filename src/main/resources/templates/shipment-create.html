@@ -1,94 +1,93 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Create Shipment - Logistics</title>
-    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
-    <link rel="stylesheet" th:href="@{/css/login.css}">
+    <meta charset="UTF-8">
+    <title>Create Shipment</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .hidden { display: none; }
+    </style>
 </head>
-<body>
+<body class="bg-light">
 
-<div class="navbar">
-    <div class="brand">📦 Logistics Co.</div>
-    <a th:href="@{/shipments}">Back to Dashboard</a>
-</div>
-
-<div class="login-container" style="height: auto; padding: 4rem 0;">
-    
-    <div class="login-card" style="max-width: 600px; text-align: left;">
-        <h2 style="text-align: center;">Register New Shipment</h2>
-        <p class="subtitle" style="text-align: center;">Enter package details below</p>
-
-        <form th:action="@{/shipments/create}" th:object="${shipmentDto}" method="post">
+<div class="container mt-5">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h3>Create New Shipment</h3>
+        </div>
+        <div class="card-body">
             
-            <div class="form-group">
-                <label>Sender (Client)</label>
-                <select th:field="*{senderId}" required style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px;">
-                    <option value="" disabled selected>Select a client...</option>
-                    <option th:each="client : ${clients}" 
-                            th:value="${client.id}" 
-                            th:text="${client.username} + ' (' + ${client.getFullName()} + ')'"></option>
-                </select>
-            </div>
+            <form th:action="@{/shipments/create}" th:object="${shipmentDto}" method="post" id="shipmentForm">
 
-            <div class="form-group">
-                <label>Receiver Name</label>
-                <input type="text" th:field="*{receiverName}" placeholder="John Doe" required>
-            </div>
-            
-            <div class="form-group">
-                <label>Receiver Username (Optional - for registered users)</label>
-                <input type="text" th:field="*{receiverUsername}" placeholder="username123">
-            </div>
+                <div class="mb-3">
+                    <label class="form-label">Sender (Client):</label>
+                    <select th:field="*{senderId}" class="form-select">
+                        <option value="" disabled selected>Select Client...</option>
+                        <option th:each="client : ${clients}" 
+                                th:value="${client.id}" 
+                                th:text="${client.username}"></option>
+                    </select>
+                    <div class="form-text">If you are a client, this will be ignored.</div>
+                </div>
 
-            <div class="form-group">
-                <label>Weight (kg)</label>
-                <input type="number" step="0.1" th:field="*{weight}" required>
-            </div>
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Receiver Username (Registered):</label>
+                        <input type="text" th:field="*{receiverUsername}" class="form-control" placeholder="Optional">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Receiver Name (Guest):</label>
+                        <input type="text" th:field="*{receiverName}" class="form-control">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Receiver Phone:</label>
+                        <input type="text" th:field="*{receiverPhone}" class="form-control">
+                    </div>
+                </div>
 
-            <div class="form-group">
-                <label>Delivery Type</label>
-                <select id="deliveryTypeSelect" th:field="*{deliveryType}" onchange="toggleAddressFields()" required 
-                        style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px;">
-                    <option value="TO_OFFICE">To Office (Cheaper)</option>
-                    <option value="TO_ADDRESS">To Address (Doorstep)</option>
-                </select>
-            </div>
+                <div class="mb-3">
+                    <label class="form-label">Weight (kg):</label>
+                    <input type="number" step="0.1" th:field="*{weight}" class="form-control" required>
+                </div>
 
-            <div id="officeField" class="form-group">
-                <label>Select Office</label>
-                <select th:field="*{targetOfficeId}" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px;">
-                    <option th:each="office : ${offices}" 
-                            th:value="${office.id}" 
-                            th:text="${office.city} + ' - ' + ${office.address}"></option>
-                </select>
-            </div>
+                <div class="mb-3">
+                    <label class="form-label">Delivery Method:</label>
+                    <select th:field="*{deliveryTypeId}" id="deliveryTypeSelect" class="form-select" onchange="toggleInputs()" required>
+                        <option value="" disabled selected>Select Type...</option>
+                        
+                        <option th:each="type : ${deliveryTypes}" 
+                                th:value="${type.id}" 
+                                th:text="${type.typeName}"
+                                
+                                // VITAL: We embed the database flag into HTML
+                                th:data-requires-office="${type.requiresOffice}">
+                        </option>
+                    </select>
+                </div>
 
-            <div id="addressField" class="form-group" style="display: none;">
-                <label>Delivery Address</label>
-                <input type="text" th:field="*{targetAddress}" placeholder="Street, City, Zip">
-            </div>
+                <div id="officeSection" class="mb-3 hidden">
+                    <label class="form-label">Target Office:</label>
+                    <select th:field="*{targetOfficeId}" id="officeSelect" class="form-select">
+                        <option value="" disabled selected>Select Office...</option>
+                        <option th:each="office : ${offices}" 
+                                th:value="${office.id}" 
+                                th:text="|${office.city} - ${office.location}|">
+                        </option>
+                    </select>
+                </div>
 
-            <button type="submit" class="login-btn">Create Shipment</button>
-        </form>
+                <div id="addressSection" class="mb-3 hidden">
+                    <label class="form-label">Delivery Address:</label>
+                    <textarea th:field="*{targetAddress}" id="addressInput" class="form-control" rows="2"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-success">Create Shipment</button>
+            </form>
+        </div>
     </div>
 </div>
 
-<script>
-    function toggleAddressFields() {
-        const type = document.getElementById("deliveryTypeSelect").value;
-        const officeDiv = document.getElementById("officeField");
-        const addressDiv = document.getElementById("addressField");
-
-        if (type === "TO_ADDRESS") {
-            officeDiv.style.display = "none";
-            addressDiv.style.display = "block";
-            // Make address required logic if needed
-        } else {
-            officeDiv.style.display = "block";
-            addressDiv.style.display = "none";
-        }
-    }
-</script>
+<script src="/js/shipment-form.js"></script>
 
 </body>
 </html>

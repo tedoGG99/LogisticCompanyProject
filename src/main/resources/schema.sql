@@ -88,19 +88,19 @@ CREATE TABLE IF NOT EXISTS shipments (
 
 
 
-INSERT INTO roles (role, is_staff) VALUES ('client', false);
-INSERT INTO roles (role, is_staff) VALUES ('courier', true);
-INSERT INTO roles (role, is_staff) VALUES ('office employee', true);
-
--- Set requires_office = true for Office delivery
-INSERT INTO delivery_types (type_name, requires_office) VALUES ('TO_OFFICE', true);
-INSERT INTO delivery_types (type_name, requires_office) VALUES ('TO_ADDRESS', false);
-
--- Set is_initial = true for Registered
-INSERT INTO shipment_statuses (status_name, is_initial) VALUES ('REGISTERED', true);
-
--- Add Prices
-INSERT INTO system_parameters (param_key, param_value) VALUES ('BASE_PRICE', '5.00');
-INSERT INTO system_parameters (param_key, param_value) VALUES ('WEIGHT_FACTOR', '2.00');
-INSERT INTO system_parameters (param_key, param_value) VALUES ('ADDRESS_SURCHARGE', '10.00');
+-- INSERT INTO roles (role, is_staff) VALUES ('client', false);
+-- INSERT INTO roles (role, is_staff) VALUES ('courier', true);
+-- INSERT INTO roles (role, is_staff) VALUES ('office employee', true);
+-- 
+-- -- Set requires_office = true for Office delivery
+-- INSERT INTO delivery_types (type_name, requires_office) VALUES ('TO_OFFICE', true);
+-- INSERT INTO delivery_types (type_name, requires_office) VALUES ('TO_ADDRESS', false);
+-- 
+-- -- Set is_initial = true for Registered
+-- INSERT INTO shipment_statuses (status_name, is_initial) VALUES ('REGISTERED', true);
+-- 
+-- -- Add Prices
+-- INSERT INTO system_parameters (param_key, param_value) VALUES ('BASE_PRICE', '5.00');
+-- INSERT INTO system_parameters (param_key, param_value) VALUES ('WEIGHT_FACTOR', '2.00');
+-- INSERT INTO system_parameters (param_key, param_value) VALUES ('ADDRESS_SURCHARGE', '10.00');
 
