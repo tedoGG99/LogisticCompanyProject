@@ -38,14 +38,14 @@ public class SecurityConfig {
                 // 2. EMPLOYEE ONLY PAGES
                 // "Employees ... register sent and received shipments" 
                 // We restrict creation and reports to employees only.
-                .requestMatchers("/shipments/create", "/shipments/edit/**", "/reports/**")
-                    .hasAnyRole("OFFICE_EMPLOYEE", "COURIER", "ADMIN")
+//                .requestMatchers("/shipments/create", "/shipments/edit/**", "/reports/**")
+//                    .hasAnyRole("OFFICE_EMPLOYEE", "COURIER", "ADMIN")
 
                 // 3. GENERAL AUTHENTICATED ACCESS
                 // "Every client can see the shipments..." 
                 // Both Clients and Employees need access to the main list.
-                .requestMatchers("/shipments", "/shipments/", "/").authenticated()
-                
+//                .requestMatchers("/shipments", "/shipments/", "/").authenticated()
+                .requestMatchers("/shipments/**").authenticated()
                 // 4. CATCH ALL
                 .anyRequest().authenticated()
             )

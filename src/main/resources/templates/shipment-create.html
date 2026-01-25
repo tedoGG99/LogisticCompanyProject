@@ -51,19 +51,17 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Delivery Method:</label>
-                    <select th:field="*{deliveryTypeId}" id="deliveryTypeSelect" class="form-select" onchange="toggleInputs()" required>
-                        <option value="" disabled selected>Select Type...</option>
-                        
-                        <option th:each="type : ${deliveryTypes}" 
-                                th:value="${type.id}" 
-                                th:text="${type.typeName}"
-                                
-                                // VITAL: We embed the database flag into HTML
-                                th:data-requires-office="${type.requiresOffice}">
-                        </option>
-                    </select>
-                </div>
+                <label class="form-label">Delivery Method:</label>
+                <select th:field="*{deliveryTypeId}" id="deliveryTypeSelect" class="form-select" onchange="toggleInputs()" required>
+                    <option value="" disabled selected>Select Type...</option>
+
+                    <option th:each="type : ${deliveryTypes}" 
+                            th:value="${type.id}" 
+                            th:text="${type.typeName}"
+                            th:data-requires-office="${type.requiresOffice}">
+                    </option>
+                </select>
+            </div>
 
                 <div id="officeSection" class="mb-3 hidden">
                     <label class="form-label">Target Office:</label>
