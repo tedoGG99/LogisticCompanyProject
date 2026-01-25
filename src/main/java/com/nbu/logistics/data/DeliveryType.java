@@ -29,28 +29,42 @@ import jakarta.persistence.Table;
 public class DeliveryType {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
-     @Column(nullable = false)
-    private String type_name;
+    private Integer id;
+    @Column(name = "type_name", nullable = false, unique = true) 
+    private String typeName;
+    
+    @Column(name = "requires_office") 
+    private Boolean requiresOffice;
 
     public DeliveryType() {
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
-    public String getType_name() {
-        return type_name;
+    public String getTypeName() {
+        return typeName;
     }
 
-    public void setType_name(String type_name) {
-        this.type_name = type_name;
+    public void setTypeName(String typeName) {
+        this.typeName = typeName;
     }
+
+    public Boolean getRequiresOffice() {
+        return requiresOffice;
+    }
+
+    public void setRequiresOffice(Boolean requiresOffice) {
+        this.requiresOffice = requiresOffice;
+    }
+
+    
+    
 
    
      

@@ -30,26 +30,29 @@ public class Role {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
     // Stores values like: "CLIENT", "OFFICE_EMPLOYEE", "COURIER"
     @Column(nullable = false, unique = true)
     private String role;
+    
+    @Column(name = "is_staff")
+    private Boolean isStaff;
 
     public Role() {
     }
 
-    public Role(int id, String role) {
+    public Role(Integer id, String role) {
         this.id = id;
         this.role = role;
     }
     
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -60,6 +63,15 @@ public class Role {
     public void setRole(String role) {
         this.role = role;
     }
+
+    public Boolean getIsStaff() {
+        return isStaff;
+    }
+
+    public void setIsStaff(Boolean isStaff) {
+        this.isStaff = isStaff;
+    }
+    
     
     
     

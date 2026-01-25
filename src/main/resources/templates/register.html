@@ -7,39 +7,93 @@
 </head>
 <body>
 
-<div class="login-container">
+<div class="login-container" style="height: auto; padding: 4rem 0;">
     <div class="login-card">
         <h2>Create Account</h2>
-        <p class="subtitle">Join us today!</p>
+        <p class="subtitle">Join our logistics network</p>
 
-        <div th:if="${param.error}" class="error-message">
-            Username already exists.
+        <div th:if="${error}" class="error-message">
+            <span th:text="${error}"></span>
         </div>
 
-        <form th:action="@{/register}" method="post">
+        <form th:action="@{/register}" th:object="${user}" method="post">
+            
             <div class="form-group">
-                <label for="username"> Username</label>
-                <input type="text" id="username" name="username" placeholder="Choose a username" required />
-            </div>
-
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" placeholder="Choose a password" required />
+                <label>Username</label>
+                <input type="text" th:field="*{username}" required>
             </div>
             
             <div class="form-group">
-                <label for="email"> Email </label>
-                <input type="email" id="email" name="email" placeholder="Enter email address" required />
+                <label>Email</label>
+                <input type="email" th:field="*{email}" required>
             </div>
 
-            <button type="submit" class="login-btn" style="background-color: #28a745;">Register</button>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" th:field="*{password}" required>
+            </div>
+
+            <div class="form-group">
+                <label>First Name</label>
+                <input type="text" th:field="*{firstName}" required>
+            </div>
+
+            <div class="form-group">
+                <label>Last Name</label>
+                <input type="text" th:field="*{lastName}" required>
+            </div>
+
+            <div class="form-group">
+                <label>Account Type</label>
+                <select id="roleSelect" th:field="*{roleName}" onchange="toggleOffice()" 
+                        style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px;">
+                    
+                    <option th:each="role : ${roles}"
+                            th:value="${role.id}"
+                            th:text="${role.role}"></option>
+<!--                    <option value="client">Client</option>
+                    <option value="office_employee">Office Employee</option>
+                    <option value="courier">Courier</option>-->
+                </select>
+            </div>
+
+            <div id="officeDiv" class="form-group" style="display:none;">
+                <label>Select Your Office</label>
+                <select th:field="*{officeId}" style="width: 100%; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px;">
+                    <option value="" disabled selected>Choose office...</option>
+                    <option th:each="office : ${offices}" 
+                            th:value="${office.id}" 
+                            th:text="${office.city} + ' - ' + ${office.name}"></option>
+                </select>
+            </div>
+
+            <button type="submit" class="login-btn">Register</button>
         </form>
 
         <div class="footer">
-            <p>Already have an account? <a th:href="@{/login}">Sign In</a></p>
+            Already have an account? <a th:href="@{/login}">Log in</a>
         </div>
     </div>
 </div>
+
+<script>
+    function toggleOffice() {
+        var role = document.getElementById("roleSelect").value;
+        var officeDiv = document.getElementById("officeDiv");
+        
+        // If role is 'office_employee', show the dropdown
+        if (role === 'office_employee') {
+            officeDiv.style.display = 'block';
+        } else {
+            officeDiv.style.display = 'none';
+        }
+    }
+    
+    // Run on page load in case of error reload
+    document.addEventListener("DOMContentLoaded", function() {
+        toggleOffice();
+    });
+</script>
 
 </body>
 </html>

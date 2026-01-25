@@ -65,8 +65,8 @@ public class ShipmentController {
 
     // 4. CHANGE STATUS (e.g., Receive/Deliver)
     @PostMapping("/{id}/status")
-    public String updateStatus(@PathVariable int id, @RequestParam("status") String newStatus) {
-        shipmentService.updateStatus(id, newStatus);
+    public String updateStatus(@PathVariable int id, @RequestParam("status") int status) {
+        shipmentService.updateStatus(id, status);
         return "redirect:/shipments";
     }
     

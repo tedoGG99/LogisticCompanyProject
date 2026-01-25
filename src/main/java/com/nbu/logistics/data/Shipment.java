@@ -34,7 +34,7 @@ import org.hibernate.annotations.CreationTimestamp;
 public class Shipment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
     // Use a String for tracking numbers (e.g., UUIDs) to avoid running out of integers
     @Column(nullable = false, unique = true)
@@ -91,11 +91,15 @@ public class Shipment {
     @ManyToOne
     @JoinColumn(name = "status_id", nullable = false)
     private ShipmentStatus status; // Enum: REGISTERED, SENT, RECEIVED, DELIVERED
+    
+    @ManyToOne
+    @JoinColumn(name = "employee_id") // This creates an 'employee_id' column in your DB
+    private User employee;
 
     public Shipment() {
     }
-    
-    public Shipment(int id, String trackingNumber, Double weight, BigDecimal price, LocalDateTime dateRegistered, LocalDateTime dateDelivered, User sender, User receiver, String receiverName, String receiverPhone, DeliveryType deliveryTypeId, Office office, String deliveryAddress, ShipmentStatus statusId) {
+
+    public Shipment(Integer id, String trackingNumber, Double weight, BigDecimal price, LocalDateTime dateRegistered, LocalDateTime dateDelivered, User sender, User receiver, String receiverName, String receiverPhone, DeliveryType deliveryTypeId, Office office, String deliveryAddress, ShipmentStatus status, User employee) {
         this.id = id;
         this.trackingNumber = trackingNumber;
         this.weight = weight;
@@ -109,14 +113,25 @@ public class Shipment {
         this.deliveryTypeId = deliveryTypeId;
         this.office = office;
         this.deliveryAddress = deliveryAddress;
-        this.status = statusId;
+        this.status = status;
+        this.employee = employee;
     }
 
-    public int getId() {
+    public User getEmployee() {
+        return employee;
+    }
+
+    public void setEmployee(User employee) {
+        this.employee = employee;
+    }
+    
+    
+
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

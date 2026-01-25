@@ -4,9 +4,12 @@
  */
 package com.nbu.logistics.repositories;
 
+import com.nbu.logistics.data.Shipment;
 import com.nbu.logistics.data.ShipmentStatus;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 /**
  *
@@ -16,4 +19,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface ShipmentStatusRepository extends JpaRepository<ShipmentStatus, Integer> { 
           
     Optional<ShipmentStatus> findByStatusName(String statusName);
+    
+    Optional<ShipmentStatus> findFirstByIsInitialTrue();
 }

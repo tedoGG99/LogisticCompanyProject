@@ -112,4 +112,8 @@ public class UserService {
         user.setEnabled(false);
         userRepository.save(user);
     }
+    
+    public List<Role> getAllRoles(){
+        return roleRepository.findAll();
+    }
 }

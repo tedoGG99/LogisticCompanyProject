@@ -31,7 +31,7 @@ import java.util.List;
 public class Office {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
 
     // e.g., "Sofia Central", "Plovdiv North"
     @Column(nullable = false)
@@ -65,7 +65,7 @@ public class Office {
     public Office() {
     }
 
-    public Office(int id, String name, String city, String address, List<Shipment> shipments, List<User> employees) {
+    public Office(Integer id, String name, String city, String address, List<Shipment> shipments, List<User> employees) {
         this.id = id;
         this.name = name;
         this.city = city;
@@ -76,11 +76,11 @@ public class Office {
     
     
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

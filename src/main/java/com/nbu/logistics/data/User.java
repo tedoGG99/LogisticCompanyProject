@@ -24,7 +24,7 @@ public class User implements UserDetails{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Integer id;
     
     @Column(nullable = false, unique = true)
     private String username;
@@ -68,11 +68,11 @@ public class User implements UserDetails{
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 

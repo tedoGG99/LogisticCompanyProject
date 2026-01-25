@@ -34,8 +34,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable()) // Keep disabled for development
             .authorizeHttpRequests(auth -> auth
                 // 1. PUBLIC ACCESS
-                .requestMatchers("/register", "/login", "/css/**", "/js/**", "/images/**").permitAll()
-                
+                .requestMatchers("/register", "/login", "/css/**", "/js/**", "/images/**", "/error").permitAll()                
                 // 2. EMPLOYEE ONLY PAGES
                 // "Employees ... register sent and received shipments" 
                 // We restrict creation and reports to employees only.

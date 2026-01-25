@@ -16,7 +16,7 @@ public class UserRegistrationDto {
     private String firstName;
     private String lastName;
     private String roleName; // e.g., "CLIENT", "OFFICE_EMPLOYEE"
-    private int officeId;   // Only if role is OFFICE_EMPLOYEE
+    private Integer officeId;   // Only if role is OFFICE_EMPLOYEE
     
     public UserRegistrationDto() {
     }
@@ -70,11 +70,11 @@ public class UserRegistrationDto {
         this.roleName = roleName;
     }
 
-    public int getOfficeId() {
+    public Integer getOfficeId() {
         return officeId;
     }
 
-    public void setOfficeId(int officeId) {
+    public void setOfficeId(Integer officeId) {
         this.officeId = officeId;
     }
     
