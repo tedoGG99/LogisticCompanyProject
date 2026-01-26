@@ -8,9 +8,11 @@ import com.nbu.logistics.dto.ShipmentDto;
 import com.nbu.logistics.repositories.DeliveryTypeRepository;
 import com.nbu.logistics.repositories.ShipmentStatusRepository;
 import com.nbu.logistics.services.OfficeService;
+import com.nbu.logistics.services.PricingService;
 import com.nbu.logistics.services.ShipmentService;
 import com.nbu.logistics.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -38,6 +40,9 @@ public class ShipmentController {
     @Autowired
     private DeliveryTypeRepository deliveryTypeRepository;
     
+    @Autowired
+    private PricingService pricingService;
+    
     // 1. DASHBOARD: List shipments based on who is logged in
     @GetMapping
     public String listShipments(@AuthenticationPrincipal UserDetails userDetails, Model model) {
@@ -50,7 +55,7 @@ public class ShipmentController {
         // We check the 'is_staff' flag from the Role table in DB
         boolean isStaff = Boolean.TRUE.equals(currentUser.getRole().getIsStaff());
         model.addAttribute("isStaff", isStaff);
-
+        model.addAttribute("couriers", shipmentService.getAllCouriers());
         // 3. DYNAMIC STATUS IDs (For the buttons)
         // We fetch the actual ID of the 'DELIVERED' status from the DB to avoid hardcoding "4" or "5"
         // Assuming you added 'is_final' column, or we look up by a convention
@@ -85,6 +90,11 @@ public class ShipmentController {
         // (You can handle this check in the HTML too via Thymeleaf)
         model.addAttribute("clients", userService.findAllClients());
         model.addAttribute("allUsers", userService.getAllUsers());
+        
+        // PASS PRICING CONFIG TO HTML so JS can use it
+        model.addAttribute("basePrice", pricingService.getBasePrice());
+        model.addAttribute("weightFactor", pricingService.getWeightFactor());
+        model.addAttribute("surcharge", pricingService.getAddressSurcharge());
 
         return "shipment-create"; // This looks for shipment-create.html in templates
     }
@@ -139,6 +149,15 @@ public class ShipmentController {
         
         model.addAttribute("shipment", shipment);
         return "shipment-details"; // This looks for shipment-details.html
+    }
+    
+    @PostMapping("/{id}/assign-courier")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_OFFICE EMPLOYEE')")
+    public String assignCourier(@PathVariable Integer id, @RequestParam Integer courierId) {
+
+        shipmentService.assignCourier(id, courierId);
+
+        return "redirect:/shipments";
     }
     
     

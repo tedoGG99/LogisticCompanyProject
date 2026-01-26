@@ -4,6 +4,7 @@ package com.nbu.logistics.services;
 import com.nbu.logistics.data.Office;
 import com.nbu.logistics.repositories.OfficeRepository;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +28,11 @@ public class OfficeService {
         }
         // This saves the new office to the database
         officeRepository.save(office);
+    }
+    
+    public Optional<Office> findOfficeById(Integer id){
+        return officeRepository.findById(id);
+        
     }
     
 }

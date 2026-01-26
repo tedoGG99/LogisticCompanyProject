@@ -63,12 +63,22 @@ public class UserService {
         user.setRole(role);
         
         // 2. Assign Office (Only for office_employee)
-        if ("office_employee".equals(roleName) && dto.getOfficeId() != 0) {
+        if ("office employee".equals(roleName) && dto.getOfficeId() != 0)  {
             Office office = officeRepository.findById(dto.getOfficeId())
                     .orElseThrow(() -> new RuntimeException("Selected office not found"));
             user.setOffice(office);
         }
 
+        userRepository.save(user);
+    }
+    
+    public void saveUser(User user) {
+        // Optional: Check for duplicates before saving
+        if (user.getId() == null && userRepository.findByUsername(user.getUsername()).isPresent()) {
+            throw new RuntimeException("Username already exists");
+        }
+
+        // Just save it. The Controller has already handled the Password and Role logic.
         userRepository.save(user);
     }
     
@@ -146,4 +156,10 @@ public class UserService {
     public User getUserById(Integer id){
         return userRepository.findById(id).orElse(null);
     }
+    
+    public boolean userExists(String username) {
+        // Assuming your repository returns Optional<User>
+        return userRepository.findByUsername(username).isPresent();
+    }
+    
 }

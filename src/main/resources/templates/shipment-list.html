@@ -8,6 +8,52 @@
     <link href="/css/dashboard.css" rel="stylesheet">
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        /* Modal Overlay (Background) */
+.modal-overlay {
+    position: fixed; 
+    z-index: 1000; 
+    left: 0;
+    top: 0;
+    width: 100%; 
+    height: 100%; 
+    overflow: auto; 
+    background-color: rgba(0,0,0,0.5); /* Black w/ opacity */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Modal Box */
+.modal-content {
+    background-color: #fefefe;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 90%; 
+    max-width: 500px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    animation: fadeIn 0.3s;
+}
+
+/* Header & Close Button */
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+.modal-header h3 { margin: 0; color: #333; }
+.close-btn { color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; }
+.close-btn:hover { color: black; }
+
+/* Table Styling */
+.pricing-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+.pricing-table td { padding: 8px; border-bottom: 1px solid #eee; }
+.pricing-table td:first-child { color: #555; }
+.pricing-table td:last-child { font-size: 0.85em; color: #777; font-style: italic; }
+
+@keyframes fadeIn {
+    from {opacity: 0; transform: translateY(-20px);}
+    to {opacity: 1; transform: translateY(0);}
+}
+    
+    </style>
 </head>
 <body>
 
@@ -24,6 +70,9 @@
             <a href="/shipments">My Shipments</a>
 
             <a href="/reports" th:if="${isStaff}">Reports</a>
+            <a href="javascript:void(0)" onclick="openPricingModal()" >
+             How the prices are this calculated?
+            </a>
             <div class="dropdown" th:if="${#authorization.expression('hasAuthority(''ROLE_ADMIN'')')}">
     
                 <a href="#" class="dropbtn">
@@ -45,6 +94,52 @@
         </div>
     </nav>
 
+ 
+       
+         <div id="pricingModal" class="modal-overlay" style="display: none;">
+             <div class="modal-content">
+                 <div class="modal-header">
+                     <h3>Shipment Pricing Formula</h3>
+                     <span class="close-btn" onclick="closePricingModal()">&times;</span>
+                 </div>
+
+                 <div class="modal-body">
+                     <p>Our prices are calculated dynamically based on current system parameters:</p>
+
+                     <table class="pricing-table">
+                         <tr>
+                             <td><strong>Base Price:</strong></td>
+                             <td>$<span th:text="${basePrice}">5.00</span></td>
+                             <td>(Fixed starting cost)</td>
+                         </tr>
+                         <tr>
+                             <td><strong>Weight Factor:</strong></td>
+                             <td>$<span th:text="${weightFactor}">2.00</span> / kg</td>
+                             <td>(Multiplied by shipment weight)</td>
+                         </tr>
+                         <tr>
+                             <td><strong>Address Surcharge:</strong></td>
+                             <td>$<span th:text="${surcharge}">10.00</span></td>
+                             <td>(Applied if delivery is to a home address)</td>
+                         </tr>
+                     </table>
+
+                     <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
+
+                     <div style="background-color: #f8f9fa; padding: 10px; border-radius: 4px;">
+                         <strong>The Formula:</strong><br>
+                         <code style="color: #d63384; font-size: 1.1em;">
+                             Price = Base + (Weight × Factor) + [Surcharge]
+                         </code>
+                     </div>
+                 </div>
+
+                 <div class="modal-footer">
+                     <button onclick="closePricingModal()" class="btn-primary" style="width: auto; padding: 5px 15px;">Close</button>
+                 </div>
+             </div>
+         </div>
+    
     <div class="main-container">
         
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
@@ -94,6 +189,20 @@
                         <td th:text="|${shipment.weight} kg|"></td>
                         
                         <td style="color: #28a745; font-weight:bold;" th:text="|$${shipment.price}|"></td>
+<!--                        <td style="vertical-align: middle; text-align: center;">
+
+                        <button class="btn-sm" 
+                                th:id="'btn-price-' + ${shipment.id}"
+                                th:onclick="'revealPrice(' + ${shipment.id} + ')'"
+                                style="background-color: #17a2b8; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer;">
+                            Show Price
+                        </button>
+
+                        <span th:id="'text-price-' + ${shipment.id}" 
+                              style="display: none; font-weight: bold; color: #0f5132; font-size: 1.1em;">
+                            $<span th:text="${shipment.price}"></span>
+                        </span>
+                    </td>-->
                         
                         <td>
                             <span class="badge" 
@@ -104,60 +213,59 @@
                         
                        <td class="action-cell">
     
-                        <div th:if="${#authorization.expression('hasAnyAuthority(''ROLE_ADMIN'', ''ROLE_OFFICE_EMPLOYEE'')')}">
-
-                            <form th:if="${shipment.status.statusName == 'REGISTERED'}" 
-                                  th:action="@{/shipments/{id}/status(id=${shipment.id})}" method="post"
-                                  style="margin-bottom: 5px;">
+                        <div th:if="${shipment.status.statusName == 'REGISTERED' 
+                                     and #authorization.expression('hasAnyAuthority(''ROLE_ADMIN'', ''ROLE_OFFICE EMPLOYEE'')')}">
+                            <form th:action="@{/shipments/{id}/status(id=${shipment.id})}" method="post">
                                 <input type="hidden" name="status" value="SENT"/>
-                                <button type="submit" class="btn-sm" style="background-color: #ffc107; border:none;">
+                                <button type="submit" class="btn-sm" 
+                                        style="background-color: #ffc107; border:none; padding: 5px 10px; cursor: pointer;">
                                     Receive
                                 </button>
                             </form>
-
-                            <form th:if="${shipment.status.statusName == 'SENT' and shipment.courier == null}"
-                                  th:action="@{/shipments/{id}/assign-courier(id=${shipment.id})}" method="post"
-                                  style="display:flex; gap:5px; margin-bottom: 5px;">
-
-                                <select name="courierId" required style="padding: 2px; width: 100px; font-size: 0.8rem;">
-                                    <option value="">Select Courier</option>
-                                    <option th:each="c : ${couriers}" 
-                                            th:value="${c.id}" 
-                                            th:text="${c.username}">
-                                    </option>
-                                </select>
-                                <button type="submit" class="btn-sm btn-primary" style="padding: 2px 5px;">Assign</button>
-                            </form>
-
-                            <div th:if="${shipment.status.statusName == 'SENT' and shipment.courier != null}" 
-                                 style="font-size: 0.85rem; color: #666; margin-bottom: 5px;">
-                                 <span>On way: </span> <strong th:text="${shipment.courier.username}"></strong>
-                            </div>
                         </div>
 
-                        <div th:if="${#authorization.expression('hasAuthority(''ROLE_COURIER'')')}">
+                        <div th:if="${shipment.status.statusName == 'SENT' and shipment.courier == null 
+                                     and #authorization.expression('hasAnyAuthority(''ROLE_ADMIN'', ''ROLE_OFFICE EMPLOYEE'')')}">
 
-                            <form th:if="${shipment.status.statusName == 'SENT' 
-                                         and shipment.courier != null 
-                                         and shipment.courier.username == #authentication.name}" 
-                                  th:action="@{/shipments/{id}/status(id=${shipment.id})}" method="post"
-                                  style="margin-bottom: 5px;">
+                             <form th:action="@{/shipments/{id}/assign-courier(id=${shipment.id})}" method="post" 
+                                   style="display:flex; gap:5px; align-items: center;">
 
-                                <input type="hidden" name="status" value="DELIVERED"/>
-                                <button type="submit" class="btn-sm" style="background-color: #28a745; color: white; border:none;">
-                                    Deliver
-                                </button>
-                            </form>
+                                 <select name="courierId" required style="padding: 2px; width: 110px; font-size: 0.8rem;">
+                                     <option value="">Select Courier</option>
+                                     <option th:each="c : ${couriers}" th:value="${c.id}" th:text="${c.username}"></option>
+                                 </select>
+
+                                 <button type="submit" class="btn-sm btn-primary" style="padding: 2px 6px;">Assign</button>
+                             </form>
                         </div>
+
+                        <div th:if="${shipment.status.statusName == 'SENT' and shipment.courier != null}" 
+                             style="font-size: 0.85rem; color: #666; margin-bottom: 5px;">
+                             <span>On way: </span> <strong th:text="${shipment.courier.username}"></strong>
+                        </div>
+
+                        <div th:if="${shipment.status.statusName == 'SENT' 
+                                    and shipment.courier != null 
+                                    and (
+                                       (shipment.courier.username == #authentication.name)
+                                       or #authorization.expression('hasAnyAuthority(''ROLE_ADMIN'', ''ROLE_OFFICE EMPLOYEE'')')
+                                    )}"
+                            style="margin-top: 5px;">
+
+                           <form th:action="@{/shipments/{id}/status(id=${shipment.id})}" method="post">
+                               <input type="hidden" name="status" value="DELIVERED"/>
+                               <button type="submit" class="btn-sm" style="background-color: #28a745; color: white; border: none; padding: 5px 10px; cursor: pointer;">
+                                   Deliver
+                               </button>
+                           </form>
+                       </div>
 
                         <span th:if="${shipment.status.statusName == 'DELIVERED'}" 
                               class="badge" style="background-color: #d1e7dd; color: #0f5132;">
                             Done
                         </span>
 
-                        <a th:href="@{/shipments/{id}(id=${shipment.id})}" 
-                           class="btn-sm btn-secondary" 
-                           style="text-decoration:none; margin-left: 5px;">
+                        <a th:href="@{/shipments/{id}(id=${shipment.id})}" class="btn-sm btn-secondary" style="margin-left: 5px;">
                            Details
                         </a>
 
@@ -173,6 +281,35 @@
             </table>
         </div>
     </div>
+    
+    <script>
+    function revealPrice(id) {
+        // Hide the button
+        var btn = document.getElementById('btn-price-' + id);
+        if(btn) btn.style.display = 'none';
+        
+        // Show the price text
+        var txt = document.getElementById('text-price-' + id);
+        if(txt) txt.style.display = 'inline-block';
+    }
+    
+        
+    function openPricingModal() {
+        document.getElementById("pricingModal").style.display = "flex";
+    }
+
+    function closePricingModal() {
+        document.getElementById("pricingModal").style.display = "none";
+    }
+
+    // Close modal if user clicks outside the box
+    window.onclick = function(event) {
+        var modal = document.getElementById("pricingModal");
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>
 
 </body>
 </html>

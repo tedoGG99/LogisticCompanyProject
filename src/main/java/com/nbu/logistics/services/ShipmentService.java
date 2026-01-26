@@ -18,8 +18,10 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 
@@ -167,31 +169,38 @@ public class ShipmentService {
 
     // VISIBILITY LOGIC
     public List<Shipment> findShipmentsForUser(User user) {
-        // Assuming User entity has a getRole() method that returns a Role entity or String
+        // 1. Get the role name (e.g. "courier", "admin", "ROLE_ADMIN")
         String roleName = user.getRole().getRole(); 
 
-        if (null == roleName) {
-            // Client sees what they sent AND what is coming to them
-            List<Shipment> sent = shipmentRepository.findBySender(user);
-            List<Shipment> received = shipmentRepository.findByReceiver(user);
-            sent.addAll(received);
-            return sent;
-        } else switch (roleName) {
-            case "ROLE_OFFICE_EMPLOYEE", "ROLE_ADMIN" -> {
+        if (roleName == null) {
+            return new ArrayList<>(); // Safety check
+        }
+
+        // 2. Normalize to uppercase to make matching easier (Optional but recommended)
+        // roleName = roleName.toUpperCase(); 
+
+        switch (roleName) {
+            case "admin", "ROLE_ADMIN", "office employee", "ROLE_OFFICE EMPLOYEE" -> {
                 return shipmentRepository.findAll();
             }
-            case "ROLE_COURIER" -> {
+            case "courier", "ROLE_COURIER" -> {
                 return shipmentRepository.findByCourier(user);
             }
-            default -> {
-                // Client sees what they sent AND what is coming to them
+            default -> // <--- Matches your Database spelling
+            {
                 List<Shipment> sent = shipmentRepository.findBySender(user);
                 List<Shipment> received = shipmentRepository.findByReceiver(user);
+                // Combine them to show both incoming and outgoing
                 sent.addAll(received);
                 return sent;
             }
         }
-    }
+        // ADMIN CASES
+        // <--- Matches your Database spelling
+        // COURIER CASES
+        // <--- Matches your Database spelling
+        // DEFAULT (Clients/Guests)
+            }
 
     public void updateStatus(int shipmentId, String newStatusName, String username) {
         Shipment shipment = shipmentRepository.findById(shipmentId)
@@ -279,5 +288,30 @@ public class ShipmentService {
     
     public Shipment getShipmentById(Integer id){
         return shipmentRepository.findById(id).orElse(null);
+    }
+    
+    public List<User> getAllCouriers() {
+        return userRepository.findAll().stream()
+                .filter(user -> {
+                    String roleName = user.getRole().getRole(); // Gets "courier" or "admin"
+                    // Check for "courier" (database version) OR "ROLE_COURIER" (security version)
+                    return "courier".equalsIgnoreCase(roleName) || "ROLE_COURIER".equalsIgnoreCase(roleName);
+                })
+                .collect(Collectors.toList());
+    }
+    
+    
+    public void assignCourier(Integer shipmentId, Integer courierId) {
+        // 1. Find the Shipment
+        Shipment shipment = shipmentRepository.findById(shipmentId)
+                .orElseThrow(() -> new IllegalArgumentException("Shipment not found"));
+
+        // 2. Find the Courier User
+        User courier = userRepository.findById(courierId)
+                .orElseThrow(() -> new IllegalArgumentException("Courier user not found"));
+
+        // 3. Assign and Save
+        shipment.setCourier(courier);
+        shipmentRepository.save(shipment);
     }
 }
