@@ -46,6 +46,7 @@ public class SecurityConfig {
                 // Both Clients and Employees need access to the main list.
 //                .requestMatchers("/shipments", "/shipments/", "/").authenticated()
                 .requestMatchers("/shipments/**").authenticated()
+                .requestMatchers("/offices/**").hasAnyAuthority("ROLE_ADMIN")
                 // 4. CATCH ALL
                 .anyRequest().authenticated()
             )

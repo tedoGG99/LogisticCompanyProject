@@ -11,19 +11,31 @@
 </head>
 <body>
 
-    <nav class="navbar">
+   <nav class="navbar">
         <div class="brand">
-            <i class="bi bi-box-seam-fill"></i> Logistics Co.
+            <i class="bi bi-box-seam-fill"></i>&nbsp;Logistics Co.
         </div>
-        
+
         <div>
             <span style="margin-right: 1rem;">
                 Welcome, <span sec:authentication="name">User</span>
             </span>
-            
+
             <a href="/shipments">My Shipments</a>
-            
+
             <a href="/reports" th:if="${isStaff}">Reports</a>
+            <div class="dropdown" th:if="${#authorization.expression('hasAuthority(''ROLE_ADMIN'')')}">
+    
+                <a href="#" class="dropbtn">
+                    <i class="bi bi-shield-lock-fill"></i> Admin Panel ▼
+                </a>
+
+                <div class="dropdown-content">
+                    <a href="/admin/offices">Manage Offices</a>
+                    <a href="/admin/users">Manage Users</a>
+                    <a href="/offices/create">Add New Office</a> 
+                </div>
+            </div>
 
             <form th:action="@{/logout}" method="post" style="display:inline;">
                 <button type="submit" style="background:none; border:none; color:white; cursor:pointer; font-weight:500; font-size:1rem; margin-left:1.5rem;">
@@ -90,21 +102,66 @@
                             </span>
                         </td>
                         
-                        <td>
-                            <div th:if="${isStaff}">
-                                <form th:if="${shipment.status.id != deliveredStatusId}"
-                                      th:action="@{/shipments/{id}/status(id=${shipment.id})}" 
-                                      method="post">
-                                    <input type="hidden" name="status" th:value="${deliveredStatusId}" />
-                                    <button type="submit" class="btn-sm btn-primary">Deliver</button>
-                                </form>
-                                <span th:if="${shipment.status.id == deliveredStatusId}" style="color:green;">Done</span>
+                       <td class="action-cell">
+    
+                        <div th:if="${#authorization.expression('hasAnyAuthority(''ROLE_ADMIN'', ''ROLE_OFFICE_EMPLOYEE'')')}">
+
+                            <form th:if="${shipment.status.statusName == 'REGISTERED'}" 
+                                  th:action="@{/shipments/{id}/status(id=${shipment.id})}" method="post"
+                                  style="margin-bottom: 5px;">
+                                <input type="hidden" name="status" value="SENT"/>
+                                <button type="submit" class="btn-sm" style="background-color: #ffc107; border:none;">
+                                    Receive
+                                </button>
+                            </form>
+
+                            <form th:if="${shipment.status.statusName == 'SENT' and shipment.courier == null}"
+                                  th:action="@{/shipments/{id}/assign-courier(id=${shipment.id})}" method="post"
+                                  style="display:flex; gap:5px; margin-bottom: 5px;">
+
+                                <select name="courierId" required style="padding: 2px; width: 100px; font-size: 0.8rem;">
+                                    <option value="">Select Courier</option>
+                                    <option th:each="c : ${couriers}" 
+                                            th:value="${c.id}" 
+                                            th:text="${c.username}">
+                                    </option>
+                                </select>
+                                <button type="submit" class="btn-sm btn-primary" style="padding: 2px 5px;">Assign</button>
+                            </form>
+
+                            <div th:if="${shipment.status.statusName == 'SENT' and shipment.courier != null}" 
+                                 style="font-size: 0.85rem; color: #666; margin-bottom: 5px;">
+                                 <span>On way: </span> <strong th:text="${shipment.courier.username}"></strong>
                             </div>
-                            
-                            <div th:if="${!isStaff}">
-                                <a href="#" style="color:#007bff; text-decoration:underline;">Details</a>
-                            </div>
-                        </td>
+                        </div>
+
+                        <div th:if="${#authorization.expression('hasAuthority(''ROLE_COURIER'')')}">
+
+                            <form th:if="${shipment.status.statusName == 'SENT' 
+                                         and shipment.courier != null 
+                                         and shipment.courier.username == #authentication.name}" 
+                                  th:action="@{/shipments/{id}/status(id=${shipment.id})}" method="post"
+                                  style="margin-bottom: 5px;">
+
+                                <input type="hidden" name="status" value="DELIVERED"/>
+                                <button type="submit" class="btn-sm" style="background-color: #28a745; color: white; border:none;">
+                                    Deliver
+                                </button>
+                            </form>
+                        </div>
+
+                        <span th:if="${shipment.status.statusName == 'DELIVERED'}" 
+                              class="badge" style="background-color: #d1e7dd; color: #0f5132;">
+                            Done
+                        </span>
+
+                        <a th:href="@{/shipments/{id}(id=${shipment.id})}" 
+                           class="btn-sm btn-secondary" 
+                           style="text-decoration:none; margin-left: 5px;">
+                           Details
+                        </a>
+
+                    </td>
                     </tr>
                     
                     <tr th:if="${#lists.isEmpty(shipments)}">

@@ -1,7 +1,4 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Interface.java to edit this template
- */
+
 package com.nbu.logistics.repositories;
 
 import com.nbu.logistics.data.Office;
@@ -14,10 +11,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-/**
- *
- * @author tedi
- */
+
 public interface ShipmentRepository extends JpaRepository<Shipment, Integer>{
     
     Optional<Shipment> findById(int id );
@@ -26,6 +20,8 @@ public interface ShipmentRepository extends JpaRepository<Shipment, Integer>{
     List<Shipment> findBySender(User sender);
     
     List<Shipment> findByReceiver(User receiver);
+    
+    List<Shipment> findByCourier(User user);
     
     @Query("SELECT s FROM Shipment s WHERE s.status.statusName NOT IN ('RECEIVED', 'DELIVERED')")
     List<Shipment> findAllUnreceivedShipments();

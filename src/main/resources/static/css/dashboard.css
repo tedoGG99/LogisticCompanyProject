@@ -95,3 +95,49 @@ body {
 .btn-primary:hover { background-color: #0056b3; }
 
 .btn-secondary { background-color: #6c757d; } /* Grey for reports */
+
+
+/* --- DROPDOWN MENU --- */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+/* The button/link that you hover over */
+.dropbtn {
+    cursor: pointer;
+}
+
+/* The hidden menu */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0; /* Aligns menu to the right edge of the button */
+    background-color: white;
+    min-width: 160px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    border-radius: 6px;
+    z-index: 1000;
+    overflow: hidden; /* Keeps corners rounded */
+}
+
+/* Links inside the dropdown */
+.dropdown-content a {
+    color: #333 !important; /* Force dark text color */
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    margin-left: 0 !important; /* Override navbar margin */
+    font-weight: normal;
+}
+
+/* Change color on hover inside the menu */
+.dropdown-content a:hover {
+    background-color: #f1f1f1;
+    color: #007bff !important;
+}
+
+/* Show the menu when hovering over the container */
+.dropdown:hover .dropdown-content {
+    display: block;
+}

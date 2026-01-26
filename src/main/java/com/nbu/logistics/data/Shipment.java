@@ -1,16 +1,4 @@
-//   **************************************************************************
-//   * @ProjectName_____________________________________@    Version: @VerNr@ *
-//   *                                                                        *
-//   * This software is the proprietary information of STRATEGY OBJECT.       *
-//   * Use is subject to license terms.                                       *
-//   *                                                                        *
-//   * Copyright (c) 1997-2025 STRATEGY OBJECT                                *
-//   * All rights reserved.                           @VersionDate__________@ *
-//   **************************************************************************
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+
 package com.nbu.logistics.data;
 
 import jakarta.persistence.Column;
@@ -25,10 +13,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import org.hibernate.annotations.CreationTimestamp;
 
-/**
- *
- * @author Teodor Georgiev
- */
+
 @Entity
 @Table(name = "shipments")
 public class Shipment {
@@ -95,11 +80,17 @@ public class Shipment {
     @ManyToOne
     @JoinColumn(name = "employee_id") // This creates an 'employee_id' column in your DB
     private User employee;
+    
+    // NEW: The Courier responsible for final delivery
+    @ManyToOne
+    @JoinColumn(name = "courier_id")
+    private User courier;
+    
 
     public Shipment() {
     }
 
-    public Shipment(Integer id, String trackingNumber, Double weight, BigDecimal price, LocalDateTime dateRegistered, LocalDateTime dateDelivered, User sender, User receiver, String receiverName, String receiverPhone, DeliveryType deliveryTypeId, Office office, String deliveryAddress, ShipmentStatus status, User employee) {
+    public Shipment(Integer id, String trackingNumber, Double weight, BigDecimal price, LocalDateTime dateRegistered, LocalDateTime dateDelivered, User sender, User receiver, String receiverName, String receiverPhone, DeliveryType deliveryTypeId, Office office, String deliveryAddress, ShipmentStatus status, User employee, User courier) {
         this.id = id;
         this.trackingNumber = trackingNumber;
         this.weight = weight;
@@ -115,7 +106,19 @@ public class Shipment {
         this.deliveryAddress = deliveryAddress;
         this.status = status;
         this.employee = employee;
+        this.courier = courier;
     }
+
+    public User getCourier() {
+        return courier;
+    }
+
+    public void setCourier(User courier) {
+        this.courier = courier;
+    }
+
+    
+    
 
     public User getEmployee() {
         return employee;
@@ -239,6 +242,16 @@ public class Shipment {
         this.status = statusId;
     }
     
+    
+    public String getSenderName() {
+        // 1. If a registered user is linked, return their username
+        if (this.sender != null) {
+            return this.sender.getUsername(); 
+            // OR: return this.sender.getFirstName() + " " + this.sender.getLastName();
+        }
+
+        return "Unknown Sender";
+    }
     
     
 }

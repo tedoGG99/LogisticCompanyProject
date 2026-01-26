@@ -31,9 +31,20 @@
                 </div>
 
                 <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Receiver Username (Registered):</label>
-                        <input type="text" th:field="*{receiverUsername}" class="form-control" placeholder="Optional">
+                    <div>
+                        <label style="font-weight:bold;">Username (Registered):</label>
+                        <select th:field="*{receiverUsername}" class="form-select" style="width: 100%; padding: 8px;">
+
+                            <option value="">-- Select Registered User (Optional) --</option>
+
+                            <option th:each="user : ${allUsers}" 
+                                    th:value="${user.username}" 
+                                    th:text="|${user.username} (${user.email})|">
+                            </option>
+                        </select>
+                        <small style="color: #666; display: block; margin-top: 5px;">
+                            Leave empty if sending to a Guest (non-registered person).
+                        </small>
                     </div>
                     <div class="col-md-4 mb-3">
                         <label class="form-label">Receiver Name (Guest):</label>
@@ -69,7 +80,7 @@
                         <option value="" disabled selected>Select Office...</option>
                         <option th:each="office : ${offices}" 
                                 th:value="${office.id}" 
-                                th:text="|${office.city} - ${office.location}|">
+                                th:text="|${office.city} - ${office.address}|">
                         </option>
                     </select>
                 </div>
@@ -85,7 +96,46 @@
     </div>
 </div>
 
-<script src="/js/shipment-form.js"></script>
+</div> </div> <script>
+    function toggleInputs() {
+        const select = document.getElementById('deliveryTypeSelect');
+        const selectedOption = select.options[select.selectedIndex];
+        
+        // Read the "data-requires-office" attribute
+        // Note: It returns a string "true" or "false"
+        const requiresOffice = selectedOption.getAttribute('data-requires-office') === 'true';
+
+        const officeSection = document.getElementById('officeSection');
+        const addressSection = document.getElementById('addressSection');
+        const officeInput = document.getElementById('officeSelect');
+        const addressInput = document.getElementById('addressInput');
+
+        if (requiresOffice) {
+            // SHOW Office, HIDE Address
+            officeSection.style.display = 'block';
+            addressSection.style.display = 'none';
+            
+            // Make Office REQUIRED
+            officeInput.setAttribute('required', 'required');
+            addressInput.removeAttribute('required');
+            addressInput.value = ""; // Clear address to be safe
+        } else {
+            // SHOW Address, HIDE Office
+            officeSection.style.display = 'none';
+            addressSection.style.display = 'block';
+            
+            // Make Address REQUIRED
+            officeInput.removeAttribute('required');
+            officeInput.value = ""; // Clear office selection
+            addressInput.setAttribute('required', 'required');
+        }
+    }
+
+    // Run on page load to set initial state
+    document.addEventListener("DOMContentLoaded", function() {
+        toggleInputs();
+    });
+</script>
 
 </body>
 </html>

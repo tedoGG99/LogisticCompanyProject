@@ -76,6 +76,7 @@ CREATE TABLE IF NOT EXISTS shipments (
     status_id           INTEGER NOT NULL,
     delivery_type_id    INTEGER NOT NULL,
     employee_id         INTEGER, 
+    courier_id          INTEGER, 
     
     /* Constraints */
     CONSTRAINT fk_shipment_sender FOREIGN KEY (sender_id) REFERENCES users(id),
@@ -87,20 +88,26 @@ CREATE TABLE IF NOT EXISTS shipments (
 );
 
 
-
+-- 
+-- INSERT INTO roles (role, is_staff) VALUES ('admin', true);
 -- INSERT INTO roles (role, is_staff) VALUES ('client', false);
 -- INSERT INTO roles (role, is_staff) VALUES ('courier', true);
 -- INSERT INTO roles (role, is_staff) VALUES ('office employee', true);
--- 
--- -- Set requires_office = true for Office delivery
+
+-- INSERT INTO users (username, email, password, first_name, last_name, enabled, role_id) VALUES ('admin', 'admin@mail.com', 'jGl25bVBBBW96Qi9Te4V37Fnqchz/Eu4qB9vKrRIqRg=', 'Admin', 'Admin', true, 1);
+
+-- Set requires_office = true for Office delivery
 -- INSERT INTO delivery_types (type_name, requires_office) VALUES ('TO_OFFICE', true);
 -- INSERT INTO delivery_types (type_name, requires_office) VALUES ('TO_ADDRESS', false);
 -- 
 -- -- Set is_initial = true for Registered
--- INSERT INTO shipment_statuses (status_name, is_initial) VALUES ('REGISTERED', true);
+-- INSERT INTO shipment_statuses (status_name, is_initial, is_final) VALUES ('REGISTERED', true, false);
+-- INSERT INTO shipment_statuses (status_name, is_initial, is_final) VALUES ('DELIVERED', false, true);
+--     INSERT INTO shipment_statuses (status_name, is_initial, is_final) VALUES ('SENT', false, false);
 -- 
 -- -- Add Prices
 -- INSERT INTO system_parameters (param_key, param_value) VALUES ('BASE_PRICE', '5.00');
 -- INSERT INTO system_parameters (param_key, param_value) VALUES ('WEIGHT_FACTOR', '2.00');
 -- INSERT INTO system_parameters (param_key, param_value) VALUES ('ADDRESS_SURCHARGE', '10.00');
+
 

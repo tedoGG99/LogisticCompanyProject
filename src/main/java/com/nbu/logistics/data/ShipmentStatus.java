@@ -1,16 +1,4 @@
-//   **************************************************************************
-//   * @ProjectName_____________________________________@    Version: @VerNr@ *
-//   *                                                                        *
-//   * This software is the proprietary information of STRATEGY OBJECT.       *
-//   * Use is subject to license terms.                                       *
-//   *                                                                        *
-//   * Copyright (c) 1997-2025 STRATEGY OBJECT                                *
-//   * All rights reserved.                           @VersionDate__________@ *
-//   **************************************************************************
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+
 package com.nbu.logistics.data;
 
 import jakarta.persistence.Column;
@@ -20,10 +8,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
-/**
- *
- * @author Teodor Georgiev
- */
+
 @Entity
 @Table(name = "shipment_statuses")
 public class ShipmentStatus {

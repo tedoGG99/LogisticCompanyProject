@@ -46,6 +46,7 @@ public class UserService {
         user.setLastName(dto.getLastName());
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setEnabled(true);
+        
 
         // 1. Assign Role (Exact match from DB)
         // We force lowercase to match your DB standard: "client", "office_employee"
@@ -60,7 +61,7 @@ public class UserService {
             role.setRole("client");
         }
         user.setRole(role);
-
+        
         // 2. Assign Office (Only for office_employee)
         if ("office_employee".equals(roleName) && dto.getOfficeId() != 0) {
             Office office = officeRepository.findById(dto.getOfficeId())
@@ -69,6 +70,23 @@ public class UserService {
         }
 
         userRepository.save(user);
+    }
+    
+    public void updateUser(User formUser) {
+        // Fetch the existing user from DB to preserve password
+        User existingUser = userRepository.findById(formUser.getId()).orElse(null);
+
+        if (existingUser != null) {
+            // Update editable fields
+            existingUser.setUsername(formUser.getUsername());
+            existingUser.setEmail(formUser.getEmail());
+            existingUser.setRole(formUser.getRole());
+            existingUser.setOffice(formUser.getOffice());
+            existingUser.setEnabled(formUser.isEnabled()); // Update status
+
+            // Save back to DB
+            userRepository.save(existingUser);
+        }
     }
     
     
@@ -115,5 +133,17 @@ public class UserService {
     
     public List<Role> getAllRoles(){
         return roleRepository.findAll();
+    }
+    
+    public Role getAdminRole(){
+        return roleRepository.findByRole("admin").orElse(null);
+    }
+    
+    public List<User> getAllUsers(){
+        return userRepository.findAll();
+    }
+    
+    public User getUserById(Integer id){
+        return userRepository.findById(id).orElse(null);
     }
 }

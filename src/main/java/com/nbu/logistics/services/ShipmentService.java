@@ -1,7 +1,4 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+
 package com.nbu.logistics.services;
 
 import com.nbu.logistics.data.DeliveryType;
@@ -23,13 +20,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-/**
- *
- * @author tedi
- */
+
+
 @Service
 public class ShipmentService {
 
@@ -88,16 +81,32 @@ public class ShipmentService {
         }
 
         // ---------------------------------------------------------
-        // 3. RECEIVER LOGIC
+        // 3. RECEIVER LOGIC (UPDATED)
         // ---------------------------------------------------------
-        // If username is provided, link to that registered user
+        
+        // CASE A: Sending to a Registered User
         if (dto.getReceiverUsername() != null && !dto.getReceiverUsername().isEmpty()) {
+            
             User receiver = userRepository.findByUsername(dto.getReceiverUsername())
                     .orElseThrow(() -> new IllegalArgumentException("Receiver username not found"));
+            
             shipment.setReceiver(receiver);
+
+
+            if (dto.getReceiverName() == null || dto.getReceiverName().trim().isEmpty()) {
+                shipment.setReceiverName(receiver.getUsername());
+            } else {
+                // If they typed a specific name (e.g. "To Mom"), keep it
+                shipment.setReceiverName(dto.getReceiverName());
+            }
+
+        } else {
+            // CASE B: Sending to a Guest (No account)
+            // We must use whatever name was typed in the text box
+            shipment.setReceiverName(dto.getReceiverName());
         }
-        // Always save the raw text names/phones (crucial for Guest receivers)
-        shipment.setReceiverName(dto.getReceiverName());
+
+        // Phone is always required/copied
         shipment.setReceiverPhone(dto.getReceiverPhone());
 
         // ---------------------------------------------------------
@@ -116,6 +125,7 @@ public class ShipmentService {
             Office office = officeRepository.findById(dto.getTargetOfficeId())
                     .orElseThrow(() -> new IllegalArgumentException("Office not found"));
             shipment.setOffice(office);
+            shipment.setDeliveryAddress(office.getFullLocation());
         } else {
             // If it doesn't require office, we assume it requires an Address (TO_HOME)
             if (dto.getTargetAddress() == null || dto.getTargetAddress().isEmpty()) {
@@ -160,35 +170,53 @@ public class ShipmentService {
         // Assuming User entity has a getRole() method that returns a Role entity or String
         String roleName = user.getRole().getRole(); 
 
-        if ("ROLE_OFFICE_EMPLOYEE".equals(roleName) || "ROLE_ADMIN".equals(roleName)) {
-            return shipmentRepository.findAll();
-        } else {
+        if (null == roleName) {
             // Client sees what they sent AND what is coming to them
             List<Shipment> sent = shipmentRepository.findBySender(user);
             List<Shipment> received = shipmentRepository.findByReceiver(user);
             sent.addAll(received);
             return sent;
+        } else switch (roleName) {
+            case "ROLE_OFFICE_EMPLOYEE", "ROLE_ADMIN" -> {
+                return shipmentRepository.findAll();
+            }
+            case "ROLE_COURIER" -> {
+                return shipmentRepository.findByCourier(user);
+            }
+            default -> {
+                // Client sees what they sent AND what is coming to them
+                List<Shipment> sent = shipmentRepository.findBySender(user);
+                List<Shipment> received = shipmentRepository.findByReceiver(user);
+                sent.addAll(received);
+                return sent;
+            }
         }
     }
 
-    // UPDATE STATUS
-    public void updateStatus(int shipmentId, int newStatusId) {
+    public void updateStatus(int shipmentId, String newStatusName, String username) {
         Shipment shipment = shipmentRepository.findById(shipmentId)
                 .orElseThrow(() -> new IllegalArgumentException("Shipment not found"));
-        
-        ShipmentStatus status = shipmentStatusRepository.findById(newStatusId)
-                .orElseThrow(() -> new IllegalArgumentException("Status ID not found"));
+
+        // 1. Convert String "SENT" -> Database Entity
+        // (Make sure your Repository has findByStatusName)
+        ShipmentStatus status = shipmentStatusRepository.findByStatusName(newStatusName)
+                .orElseThrow(() -> new IllegalArgumentException("Status not found: " + newStatusName));
 
         shipment.setStatus(status);
 
-        // If delivered, set the date
-        if ("DELIVERED".equalsIgnoreCase(status.getStatusName())) {
+        // 2. Assign Employee (if not already assigned)
+        if (shipment.getEmployee() == null && username != null) {
+            User currentUser = userRepository.findByUsername(username).orElse(null);
+            shipment.setEmployee(currentUser);
+        }
+
+        // 3. Mark Date if Delivered
+        if ("DELIVERED".equalsIgnoreCase(newStatusName)) {
             shipment.setDateDelivered(LocalDateTime.now());
         }
 
         shipmentRepository.save(shipment);
     }
-
     // DELETE
     public void deleteShipment(int id) {
         shipmentRepository.deleteById(id);
@@ -247,5 +275,9 @@ public class ShipmentService {
         // sent.sort((s1, s2) -> s2.getDateRegistered().compareTo(s1.getDateRegistered()));
 
         return sent;
+    }
+    
+    public Shipment getShipmentById(Integer id){
+        return shipmentRepository.findById(id).orElse(null);
     }
 }

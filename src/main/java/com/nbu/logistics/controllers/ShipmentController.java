@@ -1,6 +1,7 @@
 
 package com.nbu.logistics.controllers;
 
+import com.nbu.logistics.data.Shipment;
 import com.nbu.logistics.data.ShipmentStatus;
 import com.nbu.logistics.data.User;
 import com.nbu.logistics.dto.ShipmentDto;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping("/shipments")
@@ -81,7 +83,8 @@ public class ShipmentController {
 
         // 3. Optional: Only show clients list if the logged-in user is an Employee
         // (You can handle this check in the HTML too via Thymeleaf)
-        model.addAttribute("clients", userService.findAllClients()); 
+        model.addAttribute("clients", userService.findAllClients());
+        model.addAttribute("allUsers", userService.getAllUsers());
 
         return "shipment-create"; // This looks for shipment-create.html in templates
     }
@@ -99,8 +102,13 @@ public class ShipmentController {
 
     // 4. CHANGE STATUS (e.g., Receive/Deliver)
     @PostMapping("/{id}/status")
-    public String updateStatus(@PathVariable int id, @RequestParam("status") int status) {
-        shipmentService.updateStatus(id, status);
+    public String updateStatus(@PathVariable int id, 
+                               @RequestParam("status") String status, // <--- Accepts "SENT", "DELIVERED"
+                               @AuthenticationPrincipal UserDetails userDetails) {
+
+        // Pass the Username so we can log WHO updated it
+        shipmentService.updateStatus(id, status, userDetails.getUsername());
+
         return "redirect:/shipments";
     }
     
@@ -110,5 +118,31 @@ public class ShipmentController {
         shipmentService.deleteShipment(id);
         return "redirect:/shipments";
     }
+    
+    @GetMapping("/whoami")
+    @ResponseBody
+    public String whoAmI(@AuthenticationPrincipal UserDetails userDetails) {
+        // This will print exactly what Spring Security sees
+        return "User: " + userDetails.getUsername() + 
+               " | Authorities: " + userDetails.getAuthorities();
+    }
+    
+    // Display Shipment Details
+    @GetMapping("/{id}")
+    public String showShipmentDetails(@PathVariable Integer id, Model model) {
+        Shipment shipment = shipmentService.getShipmentById(id);
+        
+        // Safety check: if ID doesn't exist, go back to list
+        if (shipment == null) {
+            return "redirect:/shipments";
+        }
+        
+        model.addAttribute("shipment", shipment);
+        return "shipment-details"; // This looks for shipment-details.html
+    }
+    
+    
+    
+    
     
 }

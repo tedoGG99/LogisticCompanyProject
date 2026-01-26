@@ -1,7 +1,4 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+
 package com.nbu.logistics.config;
 
 import com.nbu.logistics.data.DeliveryType;
@@ -13,10 +10,7 @@ import com.nbu.logistics.repositories.ShipmentStatusRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
-/**
- *
- * @author tedi
- */
+
 @Component
 public class DataSeeder implements CommandLineRunner {
 

@@ -1,9 +1,7 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+
 package com.nbu.logistics.controllers;
 
+import com.nbu.logistics.data.Role;
 import com.nbu.logistics.data.User;
 import com.nbu.logistics.dto.UserRegistrationDto;
 import com.nbu.logistics.repositories.UserRepository;
@@ -11,16 +9,14 @@ import com.nbu.logistics.services.OfficeService;
 import com.nbu.logistics.services.UserService;
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-/**
- *
- * @author tedi
- */
+
 @Controller
 public class AuthController {
     private final UserService userService; 
@@ -58,7 +54,12 @@ public class AuthController {
         
         // We need the list of offices for the dropdown
         model.addAttribute("offices", officeService.getAllOffices());
-        model.addAttribute("roles", userService.getAllRoles());
+        List<Role> roles = userService.getAllRoles();
+        Role role = userService.getAdminRole();
+        if(role != null){
+            roles.remove(role);
+        }
+        model.addAttribute("roles", roles);
         return "register";
     }
 
