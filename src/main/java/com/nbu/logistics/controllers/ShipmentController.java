@@ -1,6 +1,8 @@
 
 package com.nbu.logistics.controllers;
 
+import com.nbu.logistics.data.DeliveryType;
+import com.nbu.logistics.data.Office;
 import com.nbu.logistics.data.Shipment;
 import com.nbu.logistics.data.ShipmentStatus;
 import com.nbu.logistics.data.User;
@@ -11,6 +13,8 @@ import com.nbu.logistics.services.OfficeService;
 import com.nbu.logistics.services.PricingService;
 import com.nbu.logistics.services.ShipmentService;
 import com.nbu.logistics.services.UserService;
+import java.util.ArrayList;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -79,12 +83,21 @@ public class ShipmentController {
     @GetMapping("/create")
     public String showCreateForm(Model model) {
         model.addAttribute("shipmentDto", new ShipmentDto());
-
+        
+        
+        List<Office> offices = officeService.getAllOffices();
         // 1. DROPDOWNS DATA
-        model.addAttribute("offices", officeService.getAllOffices());
+        model.addAttribute("offices", offices);
+        
+        List<DeliveryType> deliveryType;
+        if(offices.isEmpty()){
+            deliveryType = deliveryTypeRepository.findAllByRequiresOffice(false);
+        } else{
+            deliveryType = deliveryTypeRepository.findAll();
+        }
 
         // 2. We need Delivery Types to know which one requires an office
-        model.addAttribute("deliveryTypes", deliveryTypeRepository.findAll()); 
+        model.addAttribute("deliveryTypes", deliveryType); 
 
         // 3. Optional: Only show clients list if the logged-in user is an Employee
         // (You can handle this check in the HTML too via Thymeleaf)
