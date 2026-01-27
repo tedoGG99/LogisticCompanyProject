@@ -1,12 +1,3 @@
-/* 
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Other/SQLTemplate.sql to edit this template
- */
-/**
- * Author:  tedi
- * Created: Dec 21, 2025
- */
-/* 1. Create the Dependency Tables first */
 CREATE TABLE IF NOT EXISTS roles (
     id          INTEGER AUTO_INCREMENT PRIMARY KEY,
     role        VARCHAR(50) NOT NULL UNIQUE,

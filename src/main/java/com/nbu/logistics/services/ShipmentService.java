@@ -242,20 +242,25 @@ public class ShipmentService {
     
     
     public List<Shipment> findShipmentsByEmployee(int employeeId) {
+        // 1. Fetch the user
         User employee = userRepository.findById(employeeId)
             .orElseThrow(() -> new IllegalArgumentException("Employee not found with ID: " + employeeId));
 
-        // Validation: Is this user actually an employee?
-        // (Assuming you have role logic, otherwise skip this check)
-        // if (!"ROLE_OFFICE_EMPLOYEE".equals(employee.getRole().getRoleName())) {
-        //    throw new IllegalArgumentException("User is not an office employee");
-        // }
+        // 2. Check the Role (Adjust "courier" to match exactly how it is saved in your DB)
+        // It might be "courier", "COURIER", or "ROLE_COURIER"
+        String roleName = employee.getRole().getRole().toLowerCase(); 
 
-        if (employee.getOffice() == null) {
-            throw new IllegalStateException("Employee is not assigned to any office");
+        if (roleName.contains("courier")) {
+            // CASE A: It is a Courier
+            // Use the method you already have in your repository
+            return shipmentRepository.findByCourier(employee);
+        } else {
+            // CASE B: It is an Office Employee (Existing Logic)
+            if (employee.getOffice() == null) {
+                throw new IllegalStateException("Office Employee is not assigned to any office");
+            }
+            return shipmentRepository.findByOffice(employee.getOffice());
         }
-
-        return shipmentRepository.findByOffice(employee.getOffice());
     }
 
     /**
