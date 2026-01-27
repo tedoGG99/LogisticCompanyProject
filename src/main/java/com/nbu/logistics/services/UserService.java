@@ -107,9 +107,10 @@ public class UserService {
 
     /**
      * Finds all clients for the "Sender" dropdown
-     * @return 
+     *
+     * @return
      */
-    public List<User> findAllClients() {
+    public List<?> findAllClients() {
         Role clientRole = roleRepository.findByRole("client").orElse(null);
         if(clientRole == null){
             return null;
@@ -119,9 +120,10 @@ public class UserService {
 
     /**
      * Finds all employees (Office employees + Couriers) for the Reference/Report
-     * @return 
+     *
+     * @return
      */
-    public List<User> findAllEmployees() {
+    public List<?> findAllEmployees() {
         Role officeRole = roleRepository.findByRole("office employee").orElse(null);
         Role courierRole = roleRepository.findByRole("courier").orElse(null);
         
