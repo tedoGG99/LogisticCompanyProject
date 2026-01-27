@@ -2,8 +2,8 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.nbu.logistics.config;
 
+package com.nbu.logistics.config;
 import com.nbu.logistics.data.User;
 import com.nbu.logistics.repositories.UserRepository;
 import com.nbu.logistics.security.CustomPE;
