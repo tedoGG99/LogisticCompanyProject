@@ -18,9 +18,10 @@ public class ShipmentDto {
     // --- Receiver Info ---
     // Note: Cross-field validation (e.g. "if receiverName is null, username must be set")
     // is usually handled in the Service layer, not by simple annotations.
+    @Size(min = 1, message = "receiverUsername must be between 1 and 255 characters")
     private String receiverUsername; 
     
-    @Size(min = 2, message = "Receiver name must be at least 2 characters")
+    @Size(min = 1, message = "Receiver name must be at least 1 characters")
     private String receiverName;     
     
     private String receiverPhone;
@@ -32,14 +33,18 @@ public class ShipmentDto {
     // --- Database IDs (Integration) ---
 
     @NotNull(message = "Delivery Type ID is required")
+    @Positive(message = "deliveryTypeId must be a positive number")
     private Integer deliveryTypeId; 
 
     // Status is usually null on creation (defaults to CREATED), 
     // but useful for updates.
+    @Positive(message = "statusId must be a positive number")
     private Integer statusId;
 
     // --- Conditional Fields ---
+    @Positive(message = "targetOfficeId must be a positive number")    
     private Integer targetOfficeId; 
+    @Size(min = 5, max = 255, message = "targetAddress must be between 5 and 255 characters")
     private String targetAddress;
 
     // ==========================================
