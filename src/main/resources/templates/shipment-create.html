@@ -3,106 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <title>Create Shipment</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Use your project styling -->
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}" />
+
     <style>
         .hidden { display: none; }
     </style>
 </head>
-<body class="bg-light">
 
-<div class="container mt-5">
-    <div class="card shadow-sm">
-        <div class="card-header bg-primary text-white">
-            <h3>Create New Shipment</h3>
-        </div>
-        <div class="card-body">
-            
-            <form th:action="@{/shipments/create}" th:object="${shipmentDto}" method="post" id="shipmentForm">
+<body>
 
-                <div class="mb-3">
-                    <label class="form-label">Sender (Client):</label>
-                    <select th:field="*{senderId}" class="form-select">
-                        <option value="" disabled selected>Select Client...</option>
-                        <option th:each="client : ${clients}" 
-                                th:value="${client.id}" 
-                                th:text="${client.username}"></option>
-                    </select>
-                    <div class="form-text">If you are a client, this will be ignored.</div>
+<div class="main-container">
+
+    <!-- HEADER + BACK BUTTON -->
+    <div class="page-header">
+        <a th:href="@{/shipments}" class="btn-back">← Back</a>
+        <h1>Create New Shipment</h1>
+    </div>
+
+    <!-- FORM CARD -->
+    <div class="form-card">
+
+        <form th:action="@{/shipments/create}" th:object="${shipmentDto}" method="post" id="shipmentForm">
+
+            <!-- Sender -->
+            <label>Sender (Client):</label>
+            <select th:field="*{senderId}">
+                <option value="" disabled selected>Select Client...</option>
+                <option th:each="client : ${clients}"
+                        th:value="${client.id}"
+                        th:text="${client.username}"></option>
+            </select>
+            <small class="hint">If you are a client, this will be ignored.</small>
+
+            <!-- Receiver registered -->
+            <label>Username (Registered):</label>
+            <select th:field="*{receiverUsername}">
+                <option value="">-- Select Registered User (Optional) --</option>
+                <option th:each="user : ${allUsers}"
+                        th:value="${user.username}"
+                        th:text="|${user.username} (${user.email})|">
+                </option>
+            </select>
+            <small class="hint">Leave empty if sending to a Guest (non-registered person).</small>
+
+            <!-- Guest receiver name/phone -->
+            <div style="display:flex; gap: 16px; flex-wrap: wrap;">
+                <div style="flex:1; min-width: 220px;">
+                    <label>Receiver Name (Guest):</label>
+                    <input type="text" th:field="*{receiverName}">
                 </div>
 
-                <div class="row">
-                    <div>
-                        <label style="font-weight:bold;">Username (Registered):</label>
-                        <select th:field="*{receiverUsername}" class="form-select" style="width: 100%; padding: 8px;">
-
-                            <option value="">-- Select Registered User (Optional) --</option>
-
-                            <option th:each="user : ${allUsers}" 
-                                    th:value="${user.username}" 
-                                    th:text="|${user.username} (${user.email})|">
-                            </option>
-                        </select>
-                        <small style="color: #666; display: block; margin-top: 5px;">
-                            Leave empty if sending to a Guest (non-registered person).
-                        </small>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Receiver Name (Guest):</label>
-                        <input type="text" th:field="*{receiverName}" class="form-control">
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Receiver Phone:</label>
-                        <input type="text" th:field="*{receiverPhone}" class="form-control">
-                    </div>
+                <div style="flex:1; min-width: 220px;">
+                    <label>Receiver Phone:</label>
+                    <input type="text" th:field="*{receiverPhone}">
                 </div>
+            </div>
 
-                <div class="mb-3">
-                    <label class="form-label">Weight (kg):</label>
-                    <input type="number" step="0.1" th:field="*{weight}" class="form-control" required>
-                </div>
+            <!-- Weight -->
+            <label>Weight (kg):</label>
+            <input type="number" step="0.1" th:field="*{weight}" required>
 
-                <div class="mb-3">
-                <label class="form-label">Delivery Method:</label>
-                <select th:field="*{deliveryTypeId}" id="deliveryTypeSelect" class="form-select" onchange="toggleInputs()" required>
-                    <option value="" disabled selected>Select Type...</option>
+            <!-- Delivery Method -->
+            <label>Delivery Method:</label>
+            <select th:field="*{deliveryTypeId}" id="deliveryTypeSelect" onchange="toggleInputs()" required>
+                <option value="" disabled selected>Select Type...</option>
+                <option th:each="type : ${deliveryTypes}"
+                        th:value="${type.id}"
+                        th:text="${type.typeName}"
+                        th:data-requires-office="${type.requiresOffice}">
+                </option>
+            </select>
 
-                    <option th:each="type : ${deliveryTypes}" 
-                            th:value="${type.id}" 
-                            th:text="${type.typeName}"
-                            th:data-requires-office="${type.requiresOffice}">
+            <!-- Office -->
+            <div id="officeSection" class="hidden">
+                <label>Target Office:</label>
+                <select th:field="*{targetOfficeId}" id="officeSelect">
+                    <option value="" disabled selected>Select Office...</option>
+                    <option th:each="office : ${offices}"
+                            th:value="${office.id}"
+                            th:text="|${office.city} - ${office.address}|">
                     </option>
                 </select>
             </div>
 
-                <div id="officeSection" class="mb-3 hidden">
-                    <label class="form-label">Target Office:</label>
-                    <select th:field="*{targetOfficeId}" id="officeSelect" class="form-select">
-                        <option value="" disabled selected>Select Office...</option>
-                        <option th:each="office : ${offices}" 
-                                th:value="${office.id}" 
-                                th:text="|${office.city} - ${office.address}|">
-                        </option>
-                    </select>
-                </div>
+            <!-- Address -->
+            <div id="addressSection" class="hidden">
+                <label>Delivery Address:</label>
+                <textarea th:field="*{targetAddress}" id="addressInput" rows="2"></textarea>
+            </div>
 
-                <div id="addressSection" class="mb-3 hidden">
-                    <label class="form-label">Delivery Address:</label>
-                    <textarea th:field="*{targetAddress}" id="addressInput" class="form-control" rows="2"></textarea>
-                </div>
+            <!-- Submit -->
+            <div style="margin-top: 16px;">
+                <button type="submit" class="btn-sm btn-primary">Create Shipment</button>
+            </div>
 
-                <button type="submit" class="btn btn-success">Create Shipment</button>
-            </form>
-        </div>
+        </form>
+
     </div>
 </div>
 
-</div> </div> <script>
+<script>
     function toggleInputs() {
         const select = document.getElementById('deliveryTypeSelect');
         const selectedOption = select.options[select.selectedIndex];
-        
-        // Read the "data-requires-office" attribute
-        // Note: It returns a string "true" or "false"
+
         const requiresOffice = selectedOption.getAttribute('data-requires-office') === 'true';
 
         const officeSection = document.getElementById('officeSection');
@@ -111,27 +117,22 @@
         const addressInput = document.getElementById('addressInput');
 
         if (requiresOffice) {
-            // SHOW Office, HIDE Address
             officeSection.style.display = 'block';
             addressSection.style.display = 'none';
-            
-            // Make Office REQUIRED
+
             officeInput.setAttribute('required', 'required');
             addressInput.removeAttribute('required');
-            addressInput.value = ""; // Clear address to be safe
+            addressInput.value = "";
         } else {
-            // SHOW Address, HIDE Office
             officeSection.style.display = 'none';
             addressSection.style.display = 'block';
-            
-            // Make Address REQUIRED
+
             officeInput.removeAttribute('required');
-            officeInput.value = ""; // Clear office selection
+            officeInput.value = "";
             addressInput.setAttribute('required', 'required');
         }
     }
 
-    // Run on page load to set initial state
     document.addEventListener("DOMContentLoaded", function() {
         toggleInputs();
     });
