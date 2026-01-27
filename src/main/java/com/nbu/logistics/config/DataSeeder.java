@@ -33,14 +33,15 @@ public class DataSeeder implements CommandLineRunner {
         // Names must match exactly what UserService looks for ("client", "office_employee", etc.)
         seedRole("admin");
         seedRole("client");
-        seedRole("office_employee");
+//        seedRole("office_employee");
+        seedRole("office employee");
         seedRole("courier");
 
         // 2. SEED SHIPMENT STATUSES
         // Names must match exactly what ShipmentService looks for
         seedStatus("REGISTERED");
         seedStatus("SENT");
-        seedStatus("RECEIVED");
+//        seedStatus("RECEIVED");
         seedStatus("DELIVERED");
 
         // 3. SEED DELIVERY TYPES

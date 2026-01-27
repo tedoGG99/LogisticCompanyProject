@@ -122,10 +122,10 @@ public class UserService {
      * @return 
      */
     public List<User> findAllEmployees() {
-        Role officeRole = roleRepository.findByRole("office_employee").orElse(null);
+        Role officeRole = roleRepository.findByRole("office employee").orElse(null);
         Role courierRole = roleRepository.findByRole("courier").orElse(null);
         
-        if(officeRole == null || courierRole == null){
+        if(officeRole == null && courierRole == null){
             return null;
         }
         
@@ -161,5 +161,8 @@ public class UserService {
         // Assuming your repository returns Optional<User>
         return userRepository.findByUsername(username).isPresent();
     }
+    
+    
+    
     
 }

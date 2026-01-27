@@ -67,6 +67,15 @@ public class AdminController {
 
         return "user-edit";
     }
+    
+    @PostMapping("/admin/users/{id}/delete") // or /disable
+    public String disableUser(@PathVariable Integer id) {
+        // Call your service to set enabled = false
+        userService.deleteUser(id); 
+
+        return "redirect:/admin/users?success=User+disabled";
+    }
+    
 
     // 4. PROCESS UPDATE
     @PostMapping("/users/update")

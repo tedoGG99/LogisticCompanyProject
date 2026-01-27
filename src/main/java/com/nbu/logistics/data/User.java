@@ -1,5 +1,6 @@
 package com.nbu.logistics.data;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.Collection;
