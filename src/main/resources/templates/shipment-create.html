@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <title>Create Shipment</title>
 
-    <!-- Use your project styling -->
     <link rel="stylesheet" th:href="@{/css/dashboard.css}" />
 
     <style>
@@ -16,40 +15,92 @@
 
 <div class="main-container">
 
-    <!-- HEADER + BACK BUTTON -->
     <div class="page-header">
         <a th:href="@{/shipments}" class="btn-back">← Back</a>
         <h1>Create New Shipment</h1>
     </div>
 
-    <!-- FORM CARD -->
     <div class="form-card">
 
         <form th:action="@{/shipments/create}" th:object="${shipmentDto}" method="post" id="shipmentForm">
 
-            <!-- Sender -->
+            <!-- =========================
+                 SENDER (Username + Email)
+            ========================== -->
             <label>Sender (Client):</label>
-            <select th:field="*{senderId}">
-                <option value="" disabled selected>Select Client...</option>
-                <option th:each="client : ${clients}"
-                        th:value="${client.id}"
-                        th:text="${client.username}"></option>
-            </select>
-            <small class="hint">If you are a client, this will be ignored.</small>
 
-            <!-- Receiver registered -->
-            <label>Username (Registered):</label>
-            <select th:field="*{receiverUsername}">
-                <option value="">-- Select Registered User (Optional) --</option>
+            <div style="display:flex; gap: 16px; flex-wrap: wrap;">
+                <!-- sender username -->
+                <div style="flex:1; min-width: 240px;">
+                    <select th:field="*{senderId}" id="senderSelect" required>
+                        <option value="" disabled selected>Select Client...</option>
+
+                        <option th:each="client : ${clients}"
+                                th:value="${client.id}"
+                                th:text="${client.username}"
+                                th:attr="data-email=${client.email}">
+                        </option>
+                    </select>
+
+                    <small class="hint">If you are a client, this will be ignored.</small>
+                </div>
+
+                <!-- sender email autofill / editable -->
+                <div style="flex:1; min-width: 240px;">
+                    <input type="email"
+                           id="senderEmail"
+                           th:field="*{senderEmail}"
+                           readonly
+                           placeholder="Sender email...">
+
+                    <div style="margin-top: 8px; display:flex; align-items:center; gap:8px;">
+                        <input type="checkbox" id="customSenderEmailToggle" style="width:auto; height:auto;">
+                        <label for="customSenderEmailToggle" style="margin:0; font-weight:800;">
+                            Use custom email
+                        </label>
+                    </div>
+
+                    <small class="hint">Auto-filled by default. Enable custom email if needed.</small>
+                </div>
+            </div>
+
+            <!-- =========================
+                 RECEIVER (Registered OR Manual)
+            ========================== -->
+
+            <label>Receiver Username (Registered - Optional):</label>
+            <select th:field="*{receiverUsername}" id="receiverSelect">
+                <option value="">-- Manual Receiver (Guest) --</option>
+
                 <option th:each="user : ${allUsers}"
                         th:value="${user.username}"
-                        th:text="|${user.username} (${user.email})|">
+                        th:text="${user.username}"
+                        th:attr="data-email=${user.email}">
                 </option>
             </select>
-            <small class="hint">Leave empty if sending to a Guest (non-registered person).</small>
 
-            <!-- Guest receiver name/phone -->
-            <div style="display:flex; gap: 16px; flex-wrap: wrap;">
+            <small class="hint">
+                Choose registered user or leave empty for manual receiver.
+            </small>
+
+            <!-- Manual username (Guest only) -->
+            <label>Receiver Username (Manual - Guest):</label>
+            <input type="text"
+                   th:field="*{receiverManualUsername}"
+                   id="receiverManualUsername"
+                   placeholder="Enter receiver username...">
+
+            <small class="hint">Fill only if receiver is not registered.</small>
+
+            <!-- Receiver email -->
+            <label>Receiver Email:</label>
+            <input type="email"
+                   th:field="*{receiverEmail}"
+                   id="receiverEmail"
+                   placeholder="Enter receiver email..."
+                   required>
+
+            <div style="display:flex; gap: 16px; flex-wrap: wrap; margin-top: 8px;">
                 <div style="flex:1; min-width: 220px;">
                     <label>Receiver Name (Guest):</label>
                     <input type="text" th:field="*{receiverName}">
@@ -61,14 +112,19 @@
                 </div>
             </div>
 
-            <!-- Weight -->
+            <!-- =========================
+                 Shipment data
+            ========================== -->
             <label>Weight (kg):</label>
             <input type="number" step="0.1" th:field="*{weight}" required>
 
-            <!-- Delivery Method -->
+            <!-- =========================
+                 Delivery method
+            ========================== -->
             <label>Delivery Method:</label>
             <select th:field="*{deliveryTypeId}" id="deliveryTypeSelect" onchange="toggleInputs()" required>
                 <option value="" disabled selected>Select Type...</option>
+
                 <option th:each="type : ${deliveryTypes}"
                         th:value="${type.id}"
                         th:text="${type.typeName}"
@@ -76,7 +132,7 @@
                 </option>
             </select>
 
-            <!-- Office -->
+            <!-- office -->
             <div id="officeSection" class="hidden">
                 <label>Target Office:</label>
                 <select th:field="*{targetOfficeId}" id="officeSelect">
@@ -88,17 +144,15 @@
                 </select>
             </div>
 
-            <!-- Address -->
+            <!-- address -->
             <div id="addressSection" class="hidden">
                 <label>Delivery Address:</label>
                 <textarea th:field="*{targetAddress}" id="addressInput" rows="2"></textarea>
             </div>
 
-            <!-- Submit -->
             <div style="margin-top: 16px;">
                 <button type="submit" class="btn-sm btn-primary">Create Shipment</button>
             </div>
-
         </form>
 
     </div>
@@ -133,8 +187,77 @@
         }
     }
 
+    function updateSenderEmail() {
+        const senderSelect = document.getElementById("senderSelect");
+        const senderEmailInput = document.getElementById("senderEmail");
+        const toggle = document.getElementById("customSenderEmailToggle");
+
+        if (!senderSelect || !senderEmailInput || !toggle) return;
+
+        // If custom sender email is enabled -> don't overwrite
+        if (toggle.checked) return;
+
+        const selectedOption = senderSelect.options[senderSelect.selectedIndex];
+        const email = selectedOption ? selectedOption.getAttribute("data-email") : "";
+
+        senderEmailInput.value = email ? email : "";
+    }
+
+    function updateReceiverFields() {
+        const receiverSelect = document.getElementById("receiverSelect");
+        const receiverEmail = document.getElementById("receiverEmail");
+        const manualUsername = document.getElementById("receiverManualUsername");
+
+        if (!receiverSelect || !receiverEmail || !manualUsername) return;
+
+        const selectedValue = receiverSelect.value;
+
+        // Registered selected
+        if (selectedValue && selectedValue.trim() !== "") {
+            const selectedOption = receiverSelect.options[receiverSelect.selectedIndex];
+            const email = selectedOption.getAttribute("data-email");
+
+            receiverEmail.value = email ? email : "";
+            receiverEmail.setAttribute("readonly", "readonly");
+
+            manualUsername.value = "";
+            manualUsername.setAttribute("readonly", "readonly");
+        } else {
+            // Manual mode
+            receiverEmail.removeAttribute("readonly");
+            manualUsername.removeAttribute("readonly");
+        }
+    }
+
     document.addEventListener("DOMContentLoaded", function() {
         toggleInputs();
+        updateSenderEmail();
+        updateReceiverFields();
+
+        const senderSelect = document.getElementById("senderSelect");
+        const toggle = document.getElementById("customSenderEmailToggle");
+        const senderEmailInput = document.getElementById("senderEmail");
+
+        if (senderSelect) {
+            senderSelect.addEventListener("change", updateSenderEmail);
+        }
+
+        if (toggle && senderEmailInput) {
+            toggle.addEventListener("change", function() {
+                if (toggle.checked) {
+                    senderEmailInput.removeAttribute("readonly");
+                    senderEmailInput.focus();
+                } else {
+                    senderEmailInput.setAttribute("readonly", "readonly");
+                    updateSenderEmail();
+                }
+            });
+        }
+
+        const receiverSelect = document.getElementById("receiverSelect");
+        if (receiverSelect) {
+            receiverSelect.addEventListener("change", updateReceiverFields);
+        }
     });
 </script>
 
