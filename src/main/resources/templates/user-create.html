@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Create New User</title>
+    <link href="/css/dashboard.css" rel="stylesheet">
+    <style>
+        .form-row { margin-bottom: 15px; }
+        .form-label { display: block; margin-bottom: 5px; font-weight: 600; }
+        .form-control { width: 100%; padding: 8px; box-sizing: border-box; }
+        .btn-primary { width: 100%; padding: 10px; background-color: #007bff; color: white; border: none; cursor: pointer; }
+        .btn-primary:hover { background-color: #0056b3; }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="table-card" style="max-width: 500px; margin: 40px auto; padding: 20px; background: white; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
+            
+            <h2 style="text-align: center; margin-top: 0;">Create Staff / User</h2>
+            <hr style="margin-bottom: 20px;">
+            
+            <div th:if="${param.error}" style="color: red; text-align: center; margin-bottom: 10px;">
+                Username already exists!
+            </div>
+
+            <form th:action="@{/admin/users/create}" th:object="${user}" method="post">
+                
+                <div class="form-row">
+                    <label class="form-label">Username</label>
+                    <input type="text" th:field="*{username}" class="form-control" required>
+                </div>
+
+                <div class="form-row">
+                    <label class="form-label">Password</label>
+                    <input type="password" th:field="*{password}" class="form-control" required>
+                </div>
+
+                <div class="form-row">
+                    <label class="form-label">Email</label>
+                    <input type="email" th:field="*{email}" class="form-control" required>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <div class="form-row" style="flex: 1;">
+                        <label class="form-label">First Name</label>
+                        <input type="text" th:field="*{firstName}" class="form-control" required>
+                    </div>
+                    <div class="form-row" style="flex: 1;">
+                        <label class="form-label">Last Name</label>
+                        <input type="text" th:field="*{lastName}" class="form-control" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <label class="form-label">Role</label>
+                    <select name="roleId" class="form-control" required>
+                        <option value="">-- Select Role --</option>
+                        <option th:each="r : ${roles}" 
+                                th:value="${r.id}" 
+                                th:text="${r.authority}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <label class="form-label">Assign Office (If Employee/Courier)</label>
+                    <select name="officeId" class="form-control">
+                        <option value="">-- No Office --</option>
+                        <option th:each="off : ${offices}" 
+                                th:value="${off.id}" 
+                                th:text="|${off.city} - ${off.address}|">
+                        </option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-primary">Create User</button>
+                
+                <div style="text-align: center; margin-top: 15px;">
+                    <a href="/admin/users" style="text-decoration: none; color: #666;">Cancel</a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</body>
+</html>
