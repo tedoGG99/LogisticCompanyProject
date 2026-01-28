@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Shipment Details</title>
+    <link href="/css/dashboard.css" rel="stylesheet">
+</head>
+<body>
+    <div class="main-container">
+        <div class="table-card" style="max-width: 600px; margin: 0 auto;">
+            
+            <h2>Shipment #<span th:text="${shipment.id}"></span></h2>
+            
+            <p><strong>From:</strong> <span th:text="${shipment.sender != null ? shipment.sender.username : 'Guest'}"></span></p>
+            <p><strong>To:</strong> <span th:text="${shipment.receiverName}"></span></p>
+            <p><strong>Delivery Address:</strong> <span th:text="${shipment.deliveryAddress}"></span></p>
+            <p><strong>Weight:</strong> <span th:text="${shipment.weight}"></span> kg</p>
+            <p><strong>Price:</strong> $<span th:text="${shipment.price}"></span></p>
+            
+            <hr>
+            
+            <p><strong>Status:</strong> 
+               <span class="badge" th:text="${shipment.status.statusName}"></span>
+            </p>
+            
+            <div th:if="${shipment.employee != null}">
+                <p><strong>Processed By:</strong> <span th:text="${shipment.employee.username}"></span></p>
+            </div>
+            
+            <div th:if="${shipment.courier != null}">
+                <p><strong>Courier:</strong> <span th:text="${shipment.courier.username}"></span></p>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <a href="/shipments" class="btn-sm btn-primary"> <i class="bi bi-plus-lg"></i> Back to List</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

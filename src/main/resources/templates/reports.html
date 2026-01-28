@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Company Reports</title>
+    <link href="/css/dashboard.css" rel="stylesheet">
+    <style>
+        .report-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+        .report-header {
+            border-bottom: 1px solid #eee;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            color: #007bff;
+        }
+        .table-container {
+            margin-top: 15px;
+            overflow-x: auto;
+        }
+        /* JSON Result Table Styling */
+        .api-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .api-table th, .api-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        .api-table th { background-color: #f2f2f2; }
+        
+        .result-badge {
+            background: #d1e7dd; color: #0f5132; 
+            padding: 10px; border-radius: 5px; 
+            font-weight: bold; display: inline-block;
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-container" style="max-width: 1000px; margin: 30px auto;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h1>📊 System Reports</h1>
+        <a href="/shipments" class="btn-sm btn-secondary" style="text-decoration:none;">Back to Dashboard</a>
+    </div>
+
+    <div class="report-card">
+        <h3 class="report-header">💰 Financial Report (Revenue)</h3>
+        
+        <form th:action="@{/reports/revenue}" method="get" style="display: flex; gap: 15px; align-items: flex-end;">
+            <div>
+                <label>Start Date:</label>
+                <input type="date" name="startDate" class="form-control" th:value="${startDate}" required>
+            </div>
+            <div>
+                <label>End Date:</label>
+                <input type="date" name="endDate" class="form-control" th:value="${endDate}" required>
+            </div>
+            <button type="submit" class="btn-primary">Calculate Revenue</button>
+            <a href="/reports" class="btn-sm" 
+               style="background-color: #6c757d; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px; display: inline-block;">
+                Reset
+            </a>
+        </form>
+
+        <div th:if="${revenue != null}" style="margin-top: 20px; padding: 15px; background: #e8f5e9; border-left: 5px solid #28a745;">
+            <h4>Result:</h4>
+            <p>Total Revenue from <strong th:text="${startDate}"></strong> to <strong th:text="${endDate}"></strong>:</p>
+            <span style="font-size: 1.5rem; color: #198754; font-weight: bold;">
+                $<span th:text="${revenue}">0.00</span>
+            </span>
+        </div>
+    </div>
+
+    <div class="report-card">
+        <h3 class="report-header">👷 Employee Shipments</h3>
+        <div style="display: flex; gap: 10px;">
+            <select id="employeeSelect" class="form-control" style="max-width: 250px;">
+                <option value="">-- Select Employee --</option>
+                <option th:each="emp : ${employees}" 
+                        th:value="${emp.id}" 
+                        th:text="${emp.username} + ' (' + ${emp.role.role} + ')'"></option>
+            </select>
+            <button type="button" onclick="fetchEmployeeReport()" class="btn-primary">Load Data</button>
+            
+            <button type="button" 
+                    onclick="clearSection('employeeResult', 'employeeSelect')" 
+                    class="btn-sm" style="background-color: #dc3545; color: white; border: none; padding: 10px;">
+                Hide
+            </button>
+        </div>
+        <div id="employeeResult" class="table-container"></div>
+    </div>
+
+    <div class="report-card">
+        <h3 class="report-header">👤 Client History</h3>
+        <div style="display: flex; gap: 10px;">
+            <select id="clientSelect" class="form-control" style="max-width: 250px;">
+                <option value="">-- Select Client --</option>
+                <option th:each="client : ${clients}" 
+                        th:value="${client.id}" 
+                        th:text="${client.username}"></option>
+            </select>
+            <button type="button" onclick="fetchClientReport()" class="btn-primary">Load Data</button>
+            <button type="button" 
+                    onclick="clearSection('clientResult', 'clientSelect')" 
+                    class="btn-sm" style="background-color: #dc3545; color: white; border: none; padding: 10px;">
+                Hide
+            </button>       
+            
+        </div>
+        <div id="clientResult" class="table-container"></div>
+    </div>
+
+    <div class="report-card">
+        <h3 class="report-header">📦 Unreceived Packages</h3>
+        <p style="color: #666; font-size: 0.9em;">List of all shipments currently in transit or registered but not yet delivered.</p>
+        <button type="button" onclick="fetchUnreceivedReport()" class="btn-sm" style="background-color: #ffc107; border:none; padding: 8px 15px;">
+            Show Pending Shipments
+        </button>
+        
+        <button type="button" 
+                onclick="clearSection('unreceivedResult', null)" 
+                class="btn-sm" style="background-color: #dc3545; color: white; border: none; padding: 8px 15px; cursor: pointer;">
+            Hide
+        </button>
+        <div id="unreceivedResult" class="table-container"></div>
+    </div>
+
+</div>
+
+<script>
+    // Helper function to draw tables from JSON data
+    function buildTable(data, containerId) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = ""; // Clear previous results
+
+        if (!data || data.length === 0) {
+            container.innerHTML = "<p style='color:red; margin-top:10px;'>No records found.</p>";
+            return;
+        }
+
+        let html = '<table class="api-table"><thead><tr>' +
+            '<th>ID</th><th>Sender</th><th>Receiver</th><th>Status</th><th>Date</th><th>Price</th>' +
+            '</tr></thead><tbody>';
+
+        data.forEach(shipment => {
+            // Handle potentially null fields safely
+            let status = shipment.status || 'N/A';
+            let sender = shipment.sender || 'Unknown';
+            let receiver = shipment.receiver || 'Unknown';
+            let date = shipment.createdDate || 'N/A';
+            let price = shipment.price ? '$' + shipment.price : '-';
+
+            html += `<tr>
+                <td>${shipment.id}</td>
+                <td>${sender}</td>
+                <td>${receiver}</td>
+                <td><strong>${status}</strong></td>
+                <td>${date}</td>
+                <td>${price}</td>
+            </tr>`;
+        });
+
+        html += '</tbody></table>';
+        container.innerHTML = html;
+    }
+
+    // 1. Fetch Employee Data
+    async function fetchEmployeeReport() {
+        const id = document.getElementById('employeeSelect').value;
+        if(!id) return alert("Please select an employee");
+        
+        try {
+            const response = await fetch(`/reports/employee/${id}`);
+            if(response.status === 204) {
+                document.getElementById('employeeResult').innerHTML = "<p>No shipments found for this employee.</p>";
+                return;
+            }
+            const data = await response.json();
+            buildTable(data, 'employeeResult');
+        } catch (e) {
+            console.error(e);
+            alert("Error loading report");
+        }
+    }
+
+    // 2. Fetch Client Data
+    async function fetchClientReport() {
+        const id = document.getElementById('clientSelect').value;
+        if(!id) return alert("Please select a client");
+
+        try {
+            const response = await fetch(`/reports/client/${id}`);
+            if(response.status === 204) {
+                document.getElementById('clientResult').innerHTML = "<p>No shipments found for this client.</p>";
+                return;
+            }
+            const data = await response.json();
+            buildTable(data, 'clientResult');
+        } catch (e) {
+            console.error(e);
+            alert("Error loading report");
+        }
+    }
+
+    // 3. Fetch Unreceived Data
+    async function fetchUnreceivedReport() {
+        try {
+            const response = await fetch(`/reports/unreceived`);
+            if(response.status === 204) {
+                document.getElementById('unreceivedResult').innerHTML = "<p style='color:green'>All packages have been delivered!</p>";
+                return;
+            }
+            const data = await response.json();
+            buildTable(data, 'unreceivedResult');
+        } catch (e) {
+            console.error(e);
+            alert("Error loading report");
+        }
+    }
+    
+    function clearSection(resultDivId, selectBoxId) {
+        // 1. Clear the table result
+        var resultDiv = document.getElementById(resultDivId);
+        if (resultDiv) {
+            resultDiv.innerHTML = "";
+        } else {
+            console.error("Could not find div with ID: " + resultDivId);
+        }
+
+        // 2. Reset the dropdown (if an ID was provided)
+        if (selectBoxId) {
+            var selectBox = document.getElementById(selectBoxId);
+            if (selectBox) {
+                selectBox.selectedIndex = 0; // Resets to the first option ("-- Select --")
+            }
+        }
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Shipment</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .hidden { display: none; }
+    </style>
+    
+    <style>
+        /* Modal Overlay (Background) */
+.modal-overlay {
+    position: fixed; 
+    z-index: 1000; 
+    left: 0;
+    top: 0;
+    width: 100%; 
+    height: 100%; 
+    overflow: auto; 
+    background-color: rgba(0,0,0,0.5); /* Black w/ opacity */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Modal Box */
+.modal-content {
+    background-color: #fefefe;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 90%; 
+    max-width: 500px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    animation: fadeIn 0.3s;
+}
+
+/* Header & Close Button */
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+.modal-header h3 { margin: 0; color: #333; }
+.close-btn { color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; }
+.close-btn:hover { color: black; }
+
+/* Table Styling */
+.pricing-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+.pricing-table td { padding: 8px; border-bottom: 1px solid #eee; }
+.pricing-table td:first-child { color: #555; }
+.pricing-table td:last-child { font-size: 0.85em; color: #777; font-style: italic; }
+
+@keyframes fadeIn {
+    from {opacity: 0; transform: translateY(-20px);}
+    to {opacity: 1; transform: translateY(0);}
+}
+
+.btn-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    color: white;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+}
+.btn-primary { background-color: #007bff; }
+.btn-primary:hover { background-color: #0056b3; }
+        </style>
+</head>
+<body class="bg-light">
+    
+
+<div class="container mt-5">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h3>Create New Shipment</h3>
+            
+        </div>
+        
+        
+        <a href="javascript:void(0)" onclick="openPricingModal()" class="btn-sm btn-primary" 
+            >
+             (How the prices are this calculated?)
+         </a>
+
+
+         <div id="pricingModal" class="modal-overlay" style="display: none;">
+             <div class="modal-content">
+                 <div class="modal-header">
+                     <h3>Shipment Pricing Formula</h3>
+                     <span class="close-btn" onclick="closePricingModal()">&times;</span>
+                 </div>
+
+                 <div class="modal-body">
+                     <p>Our prices are calculated dynamically based on current system parameters:</p>
+
+                     <table class="pricing-table">
+                         <tr>
+                             <td><strong>Base Price:</strong></td>
+                             <td>$<span th:text="${basePrice}">5.00</span></td>
+                             <td>(Fixed starting cost)</td>
+                         </tr>
+                         <tr>
+                             <td><strong>Weight Factor:</strong></td>
+                             <td>$<span th:text="${weightFactor}">2.00</span> / kg</td>
+                             <td>(Multiplied by shipment weight)</td>
+                         </tr>
+                         <tr>
+                             <td><strong>Address Surcharge:</strong></td>
+                             <td>$<span th:text="${surcharge}">10.00</span></td>
+                             <td>(Applied if delivery is to a home address)</td>
+                         </tr>
+                     </table>
+
+                     <hr style="margin: 15px 0; border: 0; border-top: 1px solid #eee;">
+
+                     <div style="background-color: #f8f9fa; padding: 10px; border-radius: 4px;">
+                         <strong>The Formula:</strong><br>
+                         <code style="color: #d63384; font-size: 1.1em;">
+                             Price = Base + (Weight × Factor) + [Surcharge]
+                         </code>
+                     </div>
+                 </div>
+
+                 <div class="modal-footer">
+                     <button onclick="closePricingModal()" class="btn-primary" style="width: auto; padding: 5px 15px;">Close</button>
+                 </div>
+             </div>
+         </div>
+        <div class="card-body">
+            
+            <form th:action="@{/shipments/create}" th:object="${shipmentDto}" method="post" id="shipmentForm">
+
+                <div class="mb-3">
+                    <label class="form-label">Sender (Client):</label>
+                    <select th:field="*{senderId}" class="form-select">
+                        <option value="" disabled selected>Select Client...</option>
+                        <option th:each="client : ${clients}" 
+                                th:value="${client.id}" 
+                                th:text="${client.username}"></option>
+                    </select>
+                    <div class="form-text">If you are a client, this will be ignored.</div>
+                </div>
+
+                <div class="row">
+                    <div>
+                        <label style="font-weight:bold;">Username (Registered):</label>
+                        <select th:field="*{receiverUsername}" class="form-select" style="width: 100%; padding: 8px;">
+
+                            <option value="">-- Select Registered User (Optional) --</option>
+
+                            <option th:each="user : ${allUsers}" 
+                                    th:value="${user.username}" 
+                                    th:text="|${user.username} (${user.email})|">
+                            </option>
+                        </select>
+                        <small style="color: #666; display: block; margin-top: 5px;">
+                            Leave empty if sending to a Guest (non-registered person).
+                        </small>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Receiver Name (Guest):</label>
+                        <input type="text" th:field="*{receiverName}" class="form-control">
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label">Receiver Phone:</label>
+                        <input type="text" th:field="*{receiverPhone}" class="form-control">
+                    </div>
+                </div>
+                <input type="hidden" id="configBasePrice" th:value="${basePrice}">
+                <input type="hidden" id="configWeightFactor" th:value="${weightFactor}">
+                <input type="hidden" id="configSurcharge" th:value="${surcharge}">
+                <div class="mb-3">
+                    <label class="form-label">Weight (kg):</label>
+                    <input type="number" step="0.1" th:field="*{weight}" class="form-control" required   >
+                </div>
+
+                <div class="mb-3">
+                <label class="form-label">Delivery Method:</label>
+                <select th:field="*{deliveryTypeId}" id="deliveryTypeSelect" class="form-select" onchange="toggleInputs()" required>
+                    <option value="" disabled selected>Select Type...</option>
+
+                    <option th:each="type : ${deliveryTypes}" 
+                            th:value="${type.id}" 
+                            th:text="${type.typeName}"
+                            th:data-requires-office="${type.requiresOffice}">
+                    </option>
+                </select>
+            </div>
+
+                <div id="officeSection" class="mb-3 hidden">
+                    <label class="form-label">Target Office:</label>
+                    <select th:field="*{targetOfficeId}" id="officeSelect" class="form-select">
+                        <option value="" disabled selected>Select Office...</option>
+                        <option th:each="office : ${offices}" 
+                                th:value="${office.id}" 
+                                th:text="|${office.city} - ${office.address}|">
+                        </option>
+                    </select>
+                </div>
+
+                <div id="addressSection" class="mb-3 hidden">
+                    <label class="form-label">Delivery Address:</label>
+                    <textarea th:field="*{targetAddress}" id="addressInput" class="form-control" rows="2"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-success">Create Shipment</button>
+                </br>
+                <div style="margin-top: 20px">
+                    <a href="/shipments" class="btn-sm btn-primary" >Dashboard</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+</div> </div> <script>
+    function toggleInputs() {
+        const select = document.getElementById('deliveryTypeSelect');
+        const selectedOption = select.options[select.selectedIndex];
+        
+        // Read the "data-requires-office" attribute
+        // Note: It returns a string "true" or "false"
+        const requiresOffice = selectedOption.getAttribute('data-requires-office') === 'true';
+
+        const officeSection = document.getElementById('officeSection');
+        const addressSection = document.getElementById('addressSection');
+        const officeInput = document.getElementById('officeSelect');
+        const addressInput = document.getElementById('addressInput');
+
+        if (requiresOffice) {
+            // SHOW Office, HIDE Address
+            officeSection.style.display = 'block';
+            addressSection.style.display = 'none';
+            
+            // Make Office REQUIRED
+            officeInput.setAttribute('required', 'required');
+            addressInput.removeAttribute('required');
+            addressInput.value = ""; // Clear address to be safe
+        } else {
+            // SHOW Address, HIDE Office
+            officeSection.style.display = 'none';
+            addressSection.style.display = 'block';
+            
+            // Make Address REQUIRED
+            officeInput.removeAttribute('required');
+            officeInput.value = ""; // Clear office selection
+            addressInput.setAttribute('required', 'required');
+        }
+    }
+
+    // Run on page load to set initial state
+    document.addEventListener("DOMContentLoaded", function() {
+        toggleInputs();
+    });
+    
+    function openPricingModal() {
+        document.getElementById("pricingModal").style.display = "flex";
+    }
+
+    function closePricingModal() {
+        document.getElementById("pricingModal").style.display = "none";
+    }
+
+    // Close modal if user clicks outside the box
+    window.onclick = function(event) {
+        var modal = document.getElementById("pricingModal");
+        if (event.target == modal) {
+            modal.style.display = "none";
+        }
+    }
+</script>
+
+</body>
+</html>
