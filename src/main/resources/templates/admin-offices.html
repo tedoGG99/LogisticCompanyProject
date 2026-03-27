@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Offices</title>
+    <link href="/css/dashboard.css" rel="stylesheet">
+</head>
+<body>
+
+    <nav class="navbar">
+        <div class="brand">Admin Panel</div>
+        <div>
+            <a href="/shipments">Dashboard</a>
+            <a href="/admin/users">Manage Users</a>
+            <a href="/offices/create" class="btn-primary" style="padding: 5px 10px; margin-left: 10px;">+ Add Office</a>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <h2>All Offices</h2>
+        
+        <div class="table-card">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>City</th>
+                        <th>Address</th>
+                        <th>Employees</th> </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="office : ${offices}">
+                        <td th:text="${office.id}">1</td>
+                        <td style="font-weight:bold;" th:text="${office.name}">Central</td>
+                        <td th:text="${office.city}">Sofia</td>
+                        <td th:text="${office.address}">5th Ave</td>
+                        <td>
+                            <span th:text="${office.employees != null ? office.employees.size() : '-'}">0</span>
+                        </td>
+                    </tr>
+                     <tr th:if="${#lists.isEmpty(offices)}">
+                        <td colspan="5" style="text-align:center; padding:2rem; color:#666;">No offices found.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</body>
+</html>

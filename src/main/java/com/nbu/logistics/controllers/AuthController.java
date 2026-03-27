@@ -1,32 +1,33 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
+
 package com.nbu.logistics.controllers;
 
+import com.nbu.logistics.data.Role;
 import com.nbu.logistics.data.User;
+import com.nbu.logistics.dto.UserRegistrationDto;
 import com.nbu.logistics.repositories.UserRepository;
+import com.nbu.logistics.services.OfficeService;
+import com.nbu.logistics.services.UserService;
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-/**
- *
- * @author tedi
- */
+
 @Controller
 public class AuthController {
-    private final UserRepository userRepository; 
+    private final UserService userService; 
     private final PasswordEncoder passwordEncoder;
+    private final OfficeService officeService;
 
     // Constructor Injection
-    public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
+    public AuthController(UserService userService, PasswordEncoder passwordEncoder, OfficeService officeService) {
+        this.userService = userService;
         this.passwordEncoder = passwordEncoder;
+        this.officeService = officeService;
     }
     
     @GetMapping("/")
@@ -45,32 +46,41 @@ public class AuthController {
     }
 
     // --- 2. Register UI ---
+    // 2. Show Registration Form
     @GetMapping("/register")
-    public String registerPage() {
-        return "register"; // Serves register.html
+    public String showRegistrationForm(Model model) {
+        // "user" is the key we will use in the HTML th:object
+        model.addAttribute("user", new UserRegistrationDto());
+        
+        // We need the list of offices for the dropdown
+        model.addAttribute("offices", officeService.getAllOffices());
+        List<Role> roles = userService.getAllRoles();
+        Role role = userService.getAdminRole();
+        if(role != null){
+            roles.remove(role);
+        }
+        model.addAttribute("roles", roles);
+        return "register";
     }
 
-    // --- 3. Handle Registration (Works for UI form AND cURL) ---
+    // 3. Process Registration Data
     @PostMapping("/register")
-    public String registerUser(
-            @RequestParam("username") String username, 
-            @RequestParam("password") String password,
-            @RequestParam("email") String email) {
-        
-        // Check if user exists (optional safety)
-        if (userRepository.findByUsername(username).isPresent()) {
-            return "redirect:/register?error";
+    public String registerUser(@ModelAttribute("user") UserRegistrationDto registrationDto, 
+                               Model model) {
+        try {
+            // CALL THE SERVICE TO SAVE TO DATABASE
+            userService.registerUser(registrationDto);
+            
+            // Success: Redirect to login
+            return "redirect:/login?success";
+            
+        } catch (RuntimeException e) {
+            // Failure: Reload page with error message
+            model.addAttribute("error", e.getMessage());
+            model.addAttribute("user", registrationDto); // Keep what they typed
+            model.addAttribute("offices", officeService.getAllOffices());
+            return "register";
         }
-
-        // Create and Save User
-        User newUser = new User();
-        newUser.setUsername(username);
-        newUser.setPassword(passwordEncoder.encode(password)); // Hash it!
-        newUser.setEmail(email);
-        userRepository.save(newUser);
-
-        // Redirect to login page after success
-        return "redirect:/login?success";
     }
     
     

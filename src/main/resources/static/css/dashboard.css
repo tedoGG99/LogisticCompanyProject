@@ -1,0 +1,143 @@
+/* Inherit your existing variables/fonts */
+body {
+    background-color: #f0f2f5;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+}
+
+/* --- NAVIGATION BAR --- */
+.navbar {
+    background-color: #007bff; /* Matches your login button */
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.navbar a {
+    color: white;
+    text-decoration: none;
+    margin-left: 1.5rem;
+    font-weight: 500;
+}
+
+.navbar .brand {
+    font-size: 1.25rem;
+    font-weight: bold;
+}
+
+/* --- MAIN LAYOUT --- */
+.main-container {
+    padding: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* --- TABLE CARD --- */
+.table-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px; /* Matches your login card */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    overflow-x: auto; /* Responsive table */
+}
+
+/* --- DATA TABLE --- */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.data-table th, .data-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.data-table th {
+    background-color: #f8f9fa;
+    color: #444;
+    font-weight: 600;
+}
+
+.data-table tr:hover {
+    background-color: #fcfcfc;
+}
+
+/* --- STATUS BADGES --- */
+.badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+.badge-REGISTERED { background-color: #e2e3e5; color: #383d41; }
+.badge-SENT { background-color: #cff4fc; color: #055160; }
+.badge-RECEIVED { background-color: #fff3cd; color: #856404; }
+.badge-DELIVERED { background-color: #d1e7dd; color: #0f5132; }
+
+/* --- ACTION BUTTONS --- */
+.btn-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    color: white;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-primary { background-color: #007bff; }
+.btn-primary:hover { background-color: #0056b3; }
+
+.btn-secondary { background-color: #6c757d; } /* Grey for reports */
+
+
+/* --- DROPDOWN MENU --- */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+/* The button/link that you hover over */
+.dropbtn {
+    cursor: pointer;
+}
+
+/* The hidden menu */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0; /* Aligns menu to the right edge of the button */
+    background-color: white;
+    min-width: 160px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    border-radius: 6px;
+    z-index: 1000;
+    overflow: hidden; /* Keeps corners rounded */
+}
+
+/* Links inside the dropdown */
+.dropdown-content a {
+    color: #333 !important; /* Force dark text color */
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    margin-left: 0 !important; /* Override navbar margin */
+    font-weight: normal;
+}
+
+/* Change color on hover inside the menu */
+.dropdown-content a:hover {
+    background-color: #f1f1f1;
+    color: #007bff !important;
+}
+
+/* Show the menu when hovering over the container */
+.dropdown:hover .dropdown-content {
+    display: block;
+}

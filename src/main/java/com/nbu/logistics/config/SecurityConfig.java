@@ -31,40 +31,54 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable()) // Disable for easier testing
-            // 2. Public vs Protected URLs
+            .csrf(csrf -> csrf.disable()) // Keep disabled for development
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/register", "/login", "/css/**").permitAll() // Public
-                .anyRequest().authenticated() // Everything else requires login
+                // 1. PUBLIC ACCESS
+                .requestMatchers("/register", "/login", "/css/**", "/js/**", "/images/**", "/error").permitAll()                
+                // 2. EMPLOYEE ONLY PAGES
+                // "Employees ... register sent and received shipments" 
+                // We restrict creation and reports to employees only.
+//                .requestMatchers("/shipments/create", "/shipments/edit/**", "/reports/**")
+//                    .hasAnyRole("OFFICE_EMPLOYEE", "COURIER", "ADMIN")
+
+                // 3. GENERAL AUTHENTICATED ACCESS
+                // "Every client can see the shipments..." 
+                // Both Clients and Employees need access to the main list.
+//                .requestMatchers("/shipments", "/shipments/", "/").authenticated()
+                .requestMatchers("/shipments/**").authenticated()
+                .requestMatchers("/offices/**").hasAnyAuthority("ROLE_ADMIN")
+                // 4. CATCH ALL
+                .anyRequest().authenticated()
             )
             
-            // 3. Enable Form Login (For Browser Users)
+            // LOGIN SETUP
             .formLogin(form -> form
-                .loginPage("/login")             // Your custom HTML
-                .loginProcessingUrl("/login")    // Where the form POSTs to
-                .defaultSuccessUrl("/", true)    // Redirect here on success
-                .failureUrl("/login?error=true") // Redirect here on error
+                .loginPage("/login")
+                .loginProcessingUrl("/login")
+                .defaultSuccessUrl("/shipments", true) // Redirect to dashboard after login
+                .failureUrl("/login?error=true")
                 .permitAll()
             )
-            .httpBasic(Customizer.withDefaults());        // Enable Basic Auth Login
+            
+            // LOGOUT SETUP
+            .logout(logout -> logout
+                .logoutUrl("/logout")
+                .logoutSuccessUrl("/login?logout=true")
+                .permitAll()
+            )
+            
+            .httpBasic(Customizer.withDefaults());
 
         return http.build();
     }
 
-    // 3. CONNECT TO YOUR DATABASE
+    // CONNECT TO DATABASE
     @Bean
     public UserDetailsService userDetailsService(UserRepository userRepository) {
-        return username -> {
-            User user = userRepository.findByUsername(username)
+        // Since 'User' implements 'UserDetails', we can return it directly.
+        // The getAuthorities() method in your User class handles the "ROLE_" logic.
+        return username -> userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
-            return org.springframework.security.core.userdetails.User.builder()
-                .username(user.getUsername())
-                .password(user.getPassword()) // This passes the DB hash to Spring
-                .roles(user.getRole())
-                .disabled(!user.isEnabled())
-                .build();
-        };
     }
     
 }
